@@ -1,0 +1,111 @@
+package com.opsgrid.backend.service;
+
+import com.opsgrid.backend.dto.CreateDriverRequest;
+import com.opsgrid.backend.dto.DriverDTO;
+import com.opsgrid.backend.entity.Driver;
+import com.opsgrid.backend.entity.Truck;
+import com.opsgrid.backend.entity.User;
+import com.opsgrid.backend.repository.DriverRepository;
+import com.opsgrid.backend.repository.TruckRepository;
+import com.opsgrid.backend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class DriverServiceImpl implements DriverService {
+
+    private final DriverRepository driverRepository;
+    private final UserRepository userRepository;
+    private final TruckRepository truckRepository;
+
+    @Override
+    @Transactional
+    public DriverDTO createDriverProfile(CreateDriverRequest request) {
+        // 1. Find the corresponding User, who must have the ROLE_DRIVER
+        User user = userRepository.findById(request.userId())
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + request.userId()));
+        if (!"ROLE_DRIVER".equals(user.getRole().getName())) {
+            throw new RuntimeException("User is not a driver.");
+        }
+
+        // 2. Check if a driver profile already exists for this user
+        if (driverRepository.existsById(request.userId())) {
+            throw new RuntimeException("Driver profile already exists for this user.");
+        }
+
+        // 3. Create the new Driver entity
+        Driver driver = new Driver();
+        driver.setUser(user);
+        driver.setId(user.getId());
+        driver.setFullName(request.fullName());
+        driver.setLicenseNumber(request.licenseNumber());
+        driver.setContactNumber(request.contactNumber());
+
+        // 4. Optionally assign a truck
+        if (request.assignedTruckId() != null) {
+            Truck truck = truckRepository.findById(request.assignedTruckId())
+                    .orElseThrow(() -> new RuntimeException("Truck not found with id: " + request.assignedTruckId()));
+            driver.setAssignedTruck(truck);
+        }
+
+        Driver savedDriver = driverRepository.save(driver);
+        return convertToDto(savedDriver);
+    }
+
+    @Override
+    public List<DriverDTO> getAllDrivers() {
+        return driverRepository.findAll().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public DriverDTO getDriverById(UUID userId) {
+        Driver driver = driverRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Driver profile not found for user id: " + userId));
+        return convertToDto(driver);
+    }
+
+    @Override
+    @Transactional
+    public DriverDTO updateDriverProfile(UUID userId, CreateDriverRequest request) {
+        Driver driver = driverRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Driver profile not found for user id: " + userId));
+
+        driver.setFullName(request.fullName());
+        driver.setLicenseNumber(request.licenseNumber());
+        driver.setContactNumber(request.contactNumber());
+
+        // Handle truck assignment update
+        if (request.assignedTruckId() != null) {
+            Truck truck = truckRepository.findById(request.assignedTruckId())
+                    .orElseThrow(() -> new RuntimeException("Truck not found with id: " + request.assignedTruckId()));
+            driver.setAssignedTruck(truck);
+        } else {
+            driver.setAssignedTruck(null); // Un-assign truck
+        }
+
+        Driver updatedDriver = driverRepository.save(driver);
+        return convertToDto(updatedDriver);
+    }
+
+    // Helper to convert the complex Driver entity to a flat DTO
+    private DriverDTO convertToDto(Driver driver) {
+        return new DriverDTO(
+                driver.getId(),
+                driver.getUser().getUsername(),
+                driver.getUser().getEmail(),
+                driver.getFullName(),
+                driver.getLicenseNumber(),
+                driver.getContactNumber(),
+                driver.getAssignedTruck() != null ? driver.getAssignedTruck().getId() : null,
+                driver.getAssignedTruck() != null ? driver.getAssignedTruck().getLicensePlate() : null
+        );
+    }
+}

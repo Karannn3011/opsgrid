@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void setPassword(SetPasswordRequest setPasswordRequest) {
         // 1. Find user by the token
-        User user = (User) userRepository.findByInvitationToken(setPasswordRequest.token())
+        User user = userRepository.findByInvitationToken(setPasswordRequest.token())
                 .orElseThrow(() -> new RuntimeException("Error: Invalid token!"));
 
         // 2. Check if the token has expired
