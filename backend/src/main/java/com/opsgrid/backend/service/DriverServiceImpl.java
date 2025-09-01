@@ -27,14 +27,14 @@ public class DriverServiceImpl implements DriverService {
     @Override
     @Transactional
     public DriverDTO createDriverProfile(CreateDriverRequest request) {
-        // 1. Find the corresponding User, who must have the ROLE_DRIVER
+        // 1. Find the corresponding User...
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + request.userId()));
         if (!"ROLE_DRIVER".equals(user.getRole().getName())) {
             throw new RuntimeException("User is not a driver.");
         }
 
-        // 2. Check if a driver profile already exists for this user
+        // 2. Check if a driver profile already exists...
         if (driverRepository.existsById(request.userId())) {
             throw new RuntimeException("Driver profile already exists for this user.");
         }
@@ -42,12 +42,12 @@ public class DriverServiceImpl implements DriverService {
         // 3. Create the new Driver entity
         Driver driver = new Driver();
         driver.setUser(user);
-        driver.setId(user.getId());
+        // REMOVED THE LINE: driver.setId(user.getId());
         driver.setFullName(request.fullName());
         driver.setLicenseNumber(request.licenseNumber());
         driver.setContactNumber(request.contactNumber());
 
-        // 4. Optionally assign a truck
+        // 4. Optionally assign a truck...
         if (request.assignedTruckId() != null) {
             Truck truck = truckRepository.findById(request.assignedTruckId())
                     .orElseThrow(() -> new RuntimeException("Truck not found with id: " + request.assignedTruckId()));
