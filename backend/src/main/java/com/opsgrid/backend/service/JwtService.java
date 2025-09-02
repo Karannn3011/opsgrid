@@ -1,20 +1,27 @@
 package com.opsgrid.backend.service;
 
-import com.opsgrid.backend.repository.UserRepository;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-import io.jsonwebtoken.*; // Add this import
-import org.slf4j.Logger; // Add this import
-import org.slf4j.LoggerFactory; // Add this import
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication; // Import this
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import com.opsgrid.backend.repository.UserRepository;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException; // Import this
+import io.jsonwebtoken.io.Decoders; // Import this
+import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService implements InitializingBean { // Implement the interface
@@ -42,11 +49,21 @@ public class JwtService implements InitializingBean { // Implement the interface
     }
 
     public String generateJwtToken(Authentication authentication) {
-        // ... this method remains identical ...
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
+
+        // ++ START OF FIX ++
+        // 1. Get the authorities (roles) from the principal
+        List<String> roles = userPrincipal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+        // ++ END OF FIX ++
 
         return Jwts.builder()
                 .setSubject((userPrincipal.getUsername()))
+                // ++ START OF FIX ++
+                // 2. Add the roles as a custom claim to the token
+                .claim("roles", roles)
+                // ++ END OF FIX ++
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key)

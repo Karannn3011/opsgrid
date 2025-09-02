@@ -5,11 +5,14 @@ import { useAuth } from '../contexts/AuthContext';
 import LandingPage from '../pages/LandingPage';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterCompanyPage from '../pages/auth/RegisterCompanyPage';
+import SetPasswordPage from '../pages/auth/SetPasswordPage';
 
 // Import Layout and Pages
 import DashboardLayout from '../components/layout/DashboardLayout';
 import TrucksPage from '../pages/dashboard/TrucksPage';
+import UsersPage from '../pages/dashboard/UsersPage'; // Import UsersPage
 import ProtectedRoute from './ProtectedRoute';
+import AdminRoute from './AdminRoute'; // Import AdminRoute
 
 function AppRouter() {
   const { loading } = useAuth();
@@ -29,6 +32,7 @@ function AppRouter() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterCompanyPage />} />
+        <Route path="/set-password" element={<SetPasswordPage />} />
 
         {/* Protected Dashboard Routes */}
         <Route
@@ -39,14 +43,21 @@ function AppRouter() {
             </ProtectedRoute>
           }
         >
-          {/* Child routes of the dashboard */}
-          {/* Redirect /dashboard to /dashboard/trucks */}
           <Route index element={<Navigate to="trucks" replace />} />
           <Route path="trucks" element={<TrucksPage />} />
-          {/* Add placeholders for other pages */}
           <Route path="drivers" element={<div>Drivers Page Content</div>} />
           <Route path="shipments" element={<div>Shipments Page Content</div>} />
           <Route path="issues" element={<div>Issues Page Content</div>} />
+          
+          {/* Admin Only Route */}
+          <Route 
+            path="users" 
+            element={
+              <AdminRoute>
+                <UsersPage />
+              </AdminRoute>
+            } 
+          />
         </Route>
         
       </Routes>
