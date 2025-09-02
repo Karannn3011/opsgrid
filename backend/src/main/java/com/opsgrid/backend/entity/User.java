@@ -43,6 +43,11 @@ public class User {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    // NEW FIELD: Link to the Company
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;

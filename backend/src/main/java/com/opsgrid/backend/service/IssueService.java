@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface IssueService {
-    IssueDTO createIssue(CreateIssueRequest request, UUID driverId);
-    List<IssueDTO> getAllIssues();
-    IssueDTO getIssueById(Integer issueId);
-    IssueDTO updateIssueStatus(Integer issueId, IssueStatus status);
+    IssueDTO createIssue(CreateIssueRequest request, UUID driverId, Integer companyId);
+    List<IssueDTO> getAllIssues(Integer companyId);
+    IssueDTO getIssueById(Integer issueId, Integer companyId);
+    IssueDTO updateIssueStatus(Integer issueId, IssueStatus status, Integer companyId);
     // We could also add methods like assignIssueToManager, etc. later
 }

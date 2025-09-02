@@ -15,4 +15,11 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByUsername(String username);
 
     Optional<User> findFirstByRole_Name(String roleManager);
+
+    Optional<User> findByIdAndCompanyId(UUID managerId, Integer companyId);
+
+    Optional<User> findFirstByCompanyIdAndRole_Name(Integer companyId, String roleManager);
+
+    boolean existsByUsernameAndCompanyId(String username, Integer companyId);
+    boolean existsByEmailAndCompanyId(String email, Integer companyId);
 }

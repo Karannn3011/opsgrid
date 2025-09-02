@@ -1,5 +1,6 @@
 package com.opsgrid.backend.service;
 
+import com.opsgrid.backend.repository.UserRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Decoders;
@@ -19,6 +20,12 @@ import java.util.Date;
 public class JwtService implements InitializingBean { // Implement the interface
 
     private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
+
+    private final UserRepository userRepository;
+
+    public JwtService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Value("${opsgrid.app.jwtSecret}")
     private String jwtSecret;
@@ -45,6 +52,12 @@ public class JwtService implements InitializingBean { // Implement the interface
                 .signWith(key)
                 .compact();
     }
+
+    public Integer getCompanyIdFromJwtToken(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build()
+                .parseClaimsJws(token).getBody().get("companyId", Integer.class);
+    }
+
     public String getUserNameFromJwtToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
     }

@@ -21,21 +21,21 @@ public class ShipmentServiceImpl implements ShipmentService {
     private final UserRepository userRepository;
     private final DriverRepository driverRepository;
     private final TruckRepository truckRepository;
+    private final CompanyRepository companyRepository;
 
     @Override
     @Transactional
-    public ShipmentDTO createShipment(CreateShipmentRequest request, UUID managerId) {
-        // 1. Find the manager creating the shipment
-        User manager = userRepository.findById(managerId)
-                .orElseThrow(() -> new RuntimeException("Manager not found with id: " + managerId));
+    public ShipmentDTO createShipment(CreateShipmentRequest request, UUID managerId, Integer companyId) {
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new RuntimeException("Company not found with id: " + companyId));
 
-        // 2. Find the assigned driver
-        Driver driver = driverRepository.findById(request.assignedDriverId())
-                .orElseThrow(() -> new RuntimeException("Driver not found with id: " + request.assignedDriverId()));
-
-        // 3. Find the assigned truck
-        Truck truck = truckRepository.findById(request.assignedTruckId())
-                .orElseThrow(() -> new RuntimeException("Truck not found with id: " + request.assignedTruckId()));
+        // Ensure the manager, driver, and truck all belong to the same company
+        User manager = userRepository.findByIdAndCompanyId(managerId, companyId)
+                .orElseThrow(() -> new RuntimeException("Manager not found in this company"));
+        Driver driver = driverRepository.findByIdAndCompanyId(request.assignedDriverId(), companyId)
+                .orElseThrow(() -> new RuntimeException("Driver not found in this company"));
+        Truck truck = truckRepository.findByIdAndCompanyId(request.assignedTruckId(), companyId)
+                .orElseThrow(() -> new RuntimeException("Truck not found in this company"));
 
         // 4. Create and save the new shipment
         Shipment shipment = new Shipment();
@@ -46,20 +46,20 @@ public class ShipmentServiceImpl implements ShipmentService {
         shipment.setAssignedDriver(driver);
         shipment.setAssignedTruck(truck);
         shipment.setStatus(ShipmentStatus.PENDING); // Initial status
+        shipment.setCompany(company);
 
         Shipment savedShipment = shipmentRepository.save(shipment);
         return convertToDto(savedShipment);
     }
 
     @Override
-    public List<ShipmentDTO> getAllShipments() {
-        return shipmentRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
+    public List<ShipmentDTO> getAllShipments(Integer companyId) {
+        return shipmentRepository.findAllByCompanyId(companyId).stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<ShipmentDTO> getShipmentsForDriver(UUID driverId) {
-        // Now implemented using our new custom repository method
-        return shipmentRepository.findByAssignedDriverId(driverId)
+    public List<ShipmentDTO> getShipmentsForDriver(UUID driverId, Integer companyId) {
+        return shipmentRepository.findByAssignedDriverIdAndCompanyId(driverId, companyId)
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
@@ -67,8 +67,8 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     @Override
     @Transactional
-    public ShipmentDTO updateShipmentStatus(Integer shipmentId, ShipmentStatus status) {
-        Shipment shipment = shipmentRepository.findById(shipmentId)
+    public ShipmentDTO updateShipmentStatus(Integer shipmentId, ShipmentStatus status, Integer companyId) {
+        Shipment shipment = shipmentRepository.findByIdAndCompanyId(shipmentId, companyId)
                 .orElseThrow(() -> new RuntimeException("Shipment not found with id: " + shipmentId));
 
         shipment.setStatus(status);
@@ -79,6 +79,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         Shipment updatedShipment = shipmentRepository.save(shipment);
         return convertToDto(updatedShipment);
     }
+
 
     // Helper to convert the complex Shipment entity to a DTO
     private ShipmentDTO convertToDto(Shipment shipment) {
@@ -95,7 +96,9 @@ public class ShipmentServiceImpl implements ShipmentService {
                 shipment.getCreatedByManager() != null ? shipment.getCreatedByManager().getId() : null,
                 shipment.getCreatedByManager() != null ? shipment.getCreatedByManager().getUsername() : null,
                 shipment.getCreatedAt(),
-                shipment.getCompletedAt()
+                shipment.getCompletedAt(),
+                shipment.getCompany().getId(),
+                shipment.getCompany().getName()
         );
     }
 }

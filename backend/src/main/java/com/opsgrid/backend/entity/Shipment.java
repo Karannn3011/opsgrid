@@ -40,6 +40,11 @@ public class Shipment {
     @JoinColumn(name = "created_by_manager_id")
     private User createdByManager;
 
+    // NEW FIELD: Link to the Company
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
+
     @Column(name = "completed_at")
     private Instant completedAt;
 

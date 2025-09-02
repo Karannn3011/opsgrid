@@ -5,6 +5,7 @@ import com.opsgrid.backend.dto.IssueDTO;
 import com.opsgrid.backend.entity.IssueStatus;
 import com.opsgrid.backend.entity.User;
 import com.opsgrid.backend.repository.UserRepository;
+import com.opsgrid.backend.security.UserPrincipal;
 import com.opsgrid.backend.service.IssueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,36 +25,30 @@ public class IssueController {
     private final IssueService issueService;
     private final UserRepository userRepository;
 
-    // Endpoint for a DRIVER to create/report a new issue
     @PostMapping
     @PreAuthorize("hasRole('DRIVER')")
-    public ResponseEntity<?> createIssue(@RequestBody CreateIssueRequest request, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> createIssue(@RequestBody CreateIssueRequest request, @AuthenticationPrincipal UserPrincipal principal) {
         try {
-            // Get the full User object for the logged-in driver
-            User driverUser = userRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Authenticated driver user not found"));
-
-            IssueDTO newIssue = issueService.createIssue(request, driverUser.getId());
+            User driverUser = userRepository.findByUsername(principal.getUsername()).orElseThrow();
+            IssueDTO newIssue = issueService.createIssue(request, driverUser.getId(), principal.getCompanyId());
             return new ResponseEntity<>(newIssue, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    // Endpoint for MANAGERS/ADMINS to view all issues
     @GetMapping
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
-    public ResponseEntity<List<IssueDTO>> getAllIssues() {
-        return ResponseEntity.ok(issueService.getAllIssues());
+    public ResponseEntity<List<IssueDTO>> getAllIssues(@AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(issueService.getAllIssues(principal.getCompanyId()));
     }
 
-    // Endpoint for MANAGERS/ADMINS to update an issue's status (e.g., to RESOLVED or ESCALATED)
     @PutMapping("/{issueId}/status")
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
-    public ResponseEntity<?> updateIssueStatus(@PathVariable Integer issueId, @RequestBody String status) {
+    public ResponseEntity<?> updateIssueStatus(@PathVariable Integer issueId, @RequestBody String status, @AuthenticationPrincipal UserPrincipal principal) {
         try {
             IssueStatus newStatus = IssueStatus.valueOf(status.toUpperCase());
-            IssueDTO updatedIssue = issueService.updateIssueStatus(issueId, newStatus);
+            IssueDTO updatedIssue = issueService.updateIssueStatus(issueId, newStatus, principal.getCompanyId());
             return ResponseEntity.ok(updatedIssue);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Invalid status value. Must be OPEN, RESOLVED, or ESCALATED.");

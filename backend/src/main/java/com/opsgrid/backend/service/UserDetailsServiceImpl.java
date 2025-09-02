@@ -2,6 +2,7 @@ package com.opsgrid.backend.service;
 
 import com.opsgrid.backend.entity.User;
 import com.opsgrid.backend.repository.UserRepository;
+import com.opsgrid.backend.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,9 +25,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
 
-        return new org.springframework.security.core.userdetails.User(
+        return new UserPrincipal(
                 user.getUsername(),
                 user.getPassword(),
+                user.getCompany().getId(), // Pass the companyId
                 Collections.singletonList(new SimpleGrantedAuthority(user.getRole().getName()))
         );
     }

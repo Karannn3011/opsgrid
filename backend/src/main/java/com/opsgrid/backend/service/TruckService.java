@@ -6,9 +6,9 @@ import com.opsgrid.backend.dto.TruckDTO;
 import java.util.List;
 
 public interface TruckService {
-    TruckDTO createTruck(CreateTruckRequest request);
-    List<TruckDTO> getAllTrucks();
-    TruckDTO getTruckById(Integer id);
-    TruckDTO updateTruck(Integer id, CreateTruckRequest request);
-    void deleteTruck(Integer id);
+    TruckDTO createTruck(CreateTruckRequest request, Integer companyId);
+    List<TruckDTO> getAllTrucks(Integer companyId);
+    TruckDTO getTruckById(Integer id, Integer companyId);
+    TruckDTO updateTruck(Integer id, CreateTruckRequest request, Integer companyId);
+    void deleteTruck(Integer id, Integer companyId);
 }

@@ -13,5 +13,7 @@ public record TruckDTO(
         Integer year,
         Integer capacityKg,
         TruckStatus status,
-        Instant createdAt
+        Instant createdAt,
+        Integer companyId,
+        String companyName
 ) {}

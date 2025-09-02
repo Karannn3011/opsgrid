@@ -20,22 +20,23 @@ public class IssueServiceImpl implements IssueService {
     private final DriverRepository driverRepository;
     private final TruckRepository truckRepository;
     private final UserRepository userRepository; // To find a manager
+    private final CompanyRepository companyRepository;
 
     @Override
     @Transactional
-    public IssueDTO createIssue(CreateIssueRequest request, UUID driverId) {
-        // 1. Find the driver reporting the issue
-        Driver driver = driverRepository.findById(driverId)
-                .orElseThrow(() -> new RuntimeException("Driver profile not found for user id: " + driverId));
+    public IssueDTO createIssue(CreateIssueRequest request, UUID driverId, Integer companyId) {
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new RuntimeException("Company not found: " + companyId));
 
-        // 2. Find the related truck
-        Truck truck = truckRepository.findById(request.relatedTruckId())
-                .orElseThrow(() -> new RuntimeException("Truck not found with id: " + request.relatedTruckId()));
+        // Ensure driver and truck belong to the same company
+        Driver driver = driverRepository.findByIdAndCompanyId(driverId, companyId)
+                .orElseThrow(() -> new RuntimeException("Driver not found in this company"));
+        Truck truck = truckRepository.findByIdAndCompanyId(request.relatedTruckId(), companyId)
+                .orElseThrow(() -> new RuntimeException("Truck not found in this company"));
 
-        // 3. Business Logic: Find a manager to assign the issue to.
-        // (For now, we'll find the first user with ROLE_MANAGER. A real system might have more complex routing logic).
-        User manager = userRepository.findFirstByRole_Name("ROLE_MANAGER")
-                .orElseThrow(() -> new RuntimeException("No manager found to assign the issue to."));
+        // Find a manager within the SAME company to assign the issue to.
+        User manager = userRepository.findFirstByCompanyIdAndRole_Name(companyId, "ROLE_MANAGER")
+                .orElseThrow(() -> new RuntimeException("No manager found in this company to assign the issue to."));
 
         // 4. Create and save the new issue
         Issue issue = new Issue();
@@ -46,28 +47,29 @@ public class IssueServiceImpl implements IssueService {
         issue.setReportedByDriver(driver);
         issue.setRelatedTruck(truck);
         issue.setAssignedToManager(manager);
+        issue.setCompany(company); // Set the company
 
         Issue savedIssue = issueRepository.save(issue);
         return convertToDto(savedIssue);
     }
 
     @Override
-    public List<IssueDTO> getAllIssues() {
-        return issueRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
+    public List<IssueDTO> getAllIssues(Integer companyId) {
+        return issueRepository.findAllByCompanyId(companyId).stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     @Override
-    public IssueDTO getIssueById(Integer issueId) {
-        Issue issue = issueRepository.findById(issueId)
-                .orElseThrow(() -> new RuntimeException("Issue not found with id: " + issueId));
+    public IssueDTO getIssueById(Integer issueId, Integer companyId) {
+        Issue issue = issueRepository.findByIdAndCompanyId(issueId, companyId)
+                .orElseThrow(() -> new RuntimeException("Issue not found: " + issueId));
         return convertToDto(issue);
     }
 
     @Override
     @Transactional
-    public IssueDTO updateIssueStatus(Integer issueId, IssueStatus status) {
-        Issue issue = issueRepository.findById(issueId)
-                .orElseThrow(() -> new RuntimeException("Issue not found with id: " + issueId));
+    public IssueDTO updateIssueStatus(Integer issueId, IssueStatus status, Integer companyId) {
+        Issue issue = issueRepository.findByIdAndCompanyId(issueId, companyId)
+                .orElseThrow(() -> new RuntimeException("Issue not found: " + issueId));
         issue.setStatus(status);
         Issue updatedIssue = issueRepository.save(issue);
         return convertToDto(updatedIssue);
@@ -87,7 +89,9 @@ public class IssueServiceImpl implements IssueService {
                 issue.getAssignedToManager().getUsername(),
                 issue.getRelatedTruck().getId(),
                 issue.getRelatedTruck().getLicensePlate(),
-                issue.getCreatedAt()
+                issue.getCreatedAt(),
+                issue.getCompany().getId(),
+                issue.getCompany().getName()
         );
     }
 }

@@ -2,7 +2,9 @@ package com.opsgrid.backend.service;
 
 import com.opsgrid.backend.dto.CreateTruckRequest;
 import com.opsgrid.backend.dto.TruckDTO;
+import com.opsgrid.backend.entity.Company;
 import com.opsgrid.backend.entity.Truck;
+import com.opsgrid.backend.repository.CompanyRepository;
 import com.opsgrid.backend.repository.TruckRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,9 +17,10 @@ import java.util.stream.Collectors;
 public class TruckServiceImpl implements TruckService {
 
     private final TruckRepository truckRepository;
+    private final CompanyRepository companyRepository;
 
     @Override
-    public TruckDTO createTruck(CreateTruckRequest request) {
+    public TruckDTO createTruck(CreateTruckRequest request, Integer companyId) {
         Truck truck = new Truck();
         truck.setLicensePlate(request.licensePlate());
         truck.setMake(request.make());
@@ -25,29 +28,30 @@ public class TruckServiceImpl implements TruckService {
         truck.setYear(request.year());
         truck.setCapacityKg(request.capacityKg());
         truck.setStatus(request.status());
-
+        Company company = companyRepository.findById(companyId).orElseThrow();
+        truck.setCompany(company);
         Truck savedTruck = truckRepository.save(truck);
         return convertToDto(savedTruck);
     }
 
     @Override
-    public List<TruckDTO> getAllTrucks() {
-        return truckRepository.findAll()
+    public List<TruckDTO> getAllTrucks(Integer companyId) {
+        return truckRepository.findAllByCompanyId(companyId)
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public TruckDTO getTruckById(Integer id) {
-        Truck truck = truckRepository.findById(id)
+    public TruckDTO getTruckById(Integer id, Integer companyId) {
+        Truck truck = truckRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new RuntimeException("Truck not found with id: " + id));
         return convertToDto(truck);
     }
 
     @Override
-    public TruckDTO updateTruck(Integer id, CreateTruckRequest request) {
-        Truck truck = truckRepository.findById(id)
+    public TruckDTO updateTruck(Integer id, CreateTruckRequest request, Integer companyId) {
+        Truck truck = truckRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new RuntimeException("Truck not found with id: " + id));
 
         truck.setLicensePlate(request.licensePlate());
@@ -62,8 +66,8 @@ public class TruckServiceImpl implements TruckService {
     }
 
     @Override
-    public void deleteTruck(Integer id) {
-        Truck truck = truckRepository.findById(id)
+    public void deleteTruck(Integer id, Integer companyId) {
+        Truck truck = truckRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new RuntimeException("Truck not found with id: " + id));
         truckRepository.delete(truck);
     }
@@ -78,7 +82,9 @@ public class TruckServiceImpl implements TruckService {
                 truck.getYear(),
                 truck.getCapacityKg(),
                 truck.getStatus(),
-                truck.getCreatedAt()
+                truck.getCreatedAt(),
+                truck.getCompany().getId(),
+                truck.getCompany().getName()
         );
     }
 }

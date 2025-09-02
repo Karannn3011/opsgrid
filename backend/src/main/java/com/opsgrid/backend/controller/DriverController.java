@@ -2,60 +2,56 @@ package com.opsgrid.backend.controller;
 
 import com.opsgrid.backend.dto.CreateDriverRequest;
 import com.opsgrid.backend.dto.DriverDTO;
+import com.opsgrid.backend.security.UserPrincipal; // Import UserPrincipal
 import com.opsgrid.backend.service.DriverService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal; // Import this
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/drivers") // Base path for driver endpoints
+@RequestMapping("/api/v1/drivers")
 @RequiredArgsConstructor
-// Secure all methods in this controller for Managers and Admins
 @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
 public class DriverController {
 
     private final DriverService driverService;
 
-    // POST /api/v1/drivers - Create a new driver profile for an existing user
     @PostMapping
-    public ResponseEntity<?> createDriverProfile(@RequestBody CreateDriverRequest request) {
+    public ResponseEntity<?> createDriverProfile(@RequestBody CreateDriverRequest request, @AuthenticationPrincipal UserPrincipal principal) {
         try {
-            DriverDTO newDriver = driverService.createDriverProfile(request);
+            DriverDTO newDriver = driverService.createDriverProfile(request, principal.getCompanyId());
             return new ResponseEntity<>(newDriver, HttpStatus.CREATED);
         } catch (RuntimeException e) {
-            // Catches errors like "User not found", "User is not a driver", etc.
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    // GET /api/v1/drivers - Get all driver profiles
     @GetMapping
-    public ResponseEntity<List<DriverDTO>> getAllDrivers() {
-        List<DriverDTO> drivers = driverService.getAllDrivers();
+    public ResponseEntity<List<DriverDTO>> getAllDrivers(@AuthenticationPrincipal UserPrincipal principal) {
+        List<DriverDTO> drivers = driverService.getAllDrivers(principal.getCompanyId());
         return ResponseEntity.ok(drivers);
     }
 
-    // GET /api/v1/drivers/{userId} - Get a single driver profile by their user ID
     @GetMapping("/{userId}")
-    public ResponseEntity<DriverDTO> getDriverById(@PathVariable UUID userId) {
+    public ResponseEntity<DriverDTO> getDriverById(@PathVariable UUID userId, @AuthenticationPrincipal UserPrincipal principal) {
         try {
-            DriverDTO driver = driverService.getDriverById(userId);
+            DriverDTO driver = driverService.getDriverById(userId, principal.getCompanyId());
             return ResponseEntity.ok(driver);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    // PUT /api/v1/drivers/{userId} - Update an existing driver profile
     @PutMapping("/{userId}")
-    public ResponseEntity<?> updateDriverProfile(@PathVariable UUID userId, @RequestBody CreateDriverRequest request) {
+    public ResponseEntity<?> updateDriverProfile(@PathVariable UUID userId, @RequestBody CreateDriverRequest request, @AuthenticationPrincipal UserPrincipal principal) {
         try {
-            DriverDTO updatedDriver = driverService.updateDriverProfile(userId, request);
+            DriverDTO updatedDriver = driverService.updateDriverProfile(userId, request, principal.getCompanyId());
             return ResponseEntity.ok(updatedDriver);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

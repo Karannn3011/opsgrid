@@ -19,5 +19,8 @@ public record IssueDTO(
         String assignedToManagerUsername,
         Integer relatedTruckId,
         String relatedTruckLicensePlate,
-        Instant createdAt
+        Instant createdAt,
+        // ADDED COMPANY INFO
+        Integer companyId,
+        String companyName
 ) {}

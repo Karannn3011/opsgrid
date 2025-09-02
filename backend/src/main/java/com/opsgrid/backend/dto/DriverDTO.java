@@ -11,5 +11,7 @@ public record DriverDTO(
         String licenseNumber,
         String contactNumber,
         Integer assignedTruckId,
-        String assignedTruckLicensePlate
+        String assignedTruckLicensePlate,
+        Integer companyId,
+        String companyName
 ) {}

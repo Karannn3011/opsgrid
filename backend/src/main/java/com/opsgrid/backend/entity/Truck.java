@@ -41,6 +41,11 @@ public class Truck {
     // Corresponds to 'status VARCHAR(20) NOT NULL'
     private TruckStatus status;
 
+    // NEW FIELD: Link to the Company
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     // Corresponds to 'created_at TIMESTAMPTZ DEFAULT now()' [cite: 190]

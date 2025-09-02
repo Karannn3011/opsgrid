@@ -39,4 +39,9 @@ public class Driver {
     @JoinColumn(name = "assigned_truck_id", referencedColumnName = "id")
     // Corresponds to 'assigned_truck_id INT REFERENCES trucks(id)'
     private Truck assignedTruck;
+
+    // NEW FIELD: Link to the Company
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }

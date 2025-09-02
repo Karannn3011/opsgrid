@@ -2,9 +2,11 @@ package com.opsgrid.backend.service;
 
 import com.opsgrid.backend.dto.CreateDriverRequest;
 import com.opsgrid.backend.dto.DriverDTO;
+import com.opsgrid.backend.entity.Company;
 import com.opsgrid.backend.entity.Driver;
 import com.opsgrid.backend.entity.Truck;
 import com.opsgrid.backend.entity.User;
+import com.opsgrid.backend.repository.CompanyRepository;
 import com.opsgrid.backend.repository.DriverRepository;
 import com.opsgrid.backend.repository.TruckRepository;
 import com.opsgrid.backend.repository.UserRepository;
@@ -23,10 +25,13 @@ public class DriverServiceImpl implements DriverService {
     private final DriverRepository driverRepository;
     private final UserRepository userRepository;
     private final TruckRepository truckRepository;
+    private final CompanyRepository companyRepository;
 
     @Override
     @Transactional
-    public DriverDTO createDriverProfile(CreateDriverRequest request) {
+    public DriverDTO createDriverProfile(CreateDriverRequest request, Integer companyId) {
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new RuntimeException("Company not found with id: " + companyId));
         // 1. Find the corresponding User...
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + request.userId()));
@@ -42,6 +47,7 @@ public class DriverServiceImpl implements DriverService {
         // 3. Create the new Driver entity
         Driver driver = new Driver();
         driver.setUser(user);
+        driver.setCompany(company);
         // REMOVED THE LINE: driver.setId(user.getId());
         driver.setFullName(request.fullName());
         driver.setLicenseNumber(request.licenseNumber());
@@ -49,7 +55,7 @@ public class DriverServiceImpl implements DriverService {
 
         // 4. Optionally assign a truck...
         if (request.assignedTruckId() != null) {
-            Truck truck = truckRepository.findById(request.assignedTruckId())
+            Truck truck = truckRepository.findByIdAndCompanyId(request.assignedTruckId(), companyId)
                     .orElseThrow(() -> new RuntimeException("Truck not found with id: " + request.assignedTruckId()));
             driver.setAssignedTruck(truck);
         }
@@ -59,23 +65,23 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public List<DriverDTO> getAllDrivers() {
-        return driverRepository.findAll().stream()
+    public List<DriverDTO> getAllDrivers(Integer companyId) {
+        return driverRepository.findAllByCompanyId(companyId).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public DriverDTO getDriverById(UUID userId) {
-        Driver driver = driverRepository.findById(userId)
+    public DriverDTO getDriverById(UUID userId, Integer companyId) {
+        Driver driver = driverRepository.findByIdAndCompanyId(userId, companyId)
                 .orElseThrow(() -> new RuntimeException("Driver profile not found for user id: " + userId));
         return convertToDto(driver);
     }
 
     @Override
     @Transactional
-    public DriverDTO updateDriverProfile(UUID userId, CreateDriverRequest request) {
-        Driver driver = driverRepository.findById(userId)
+    public DriverDTO updateDriverProfile(UUID userId, CreateDriverRequest request, Integer companyId) {
+        Driver driver = driverRepository.findByIdAndCompanyId(userId, companyId)
                 .orElseThrow(() -> new RuntimeException("Driver profile not found for user id: " + userId));
 
         driver.setFullName(request.fullName());
@@ -84,11 +90,11 @@ public class DriverServiceImpl implements DriverService {
 
         // Handle truck assignment update
         if (request.assignedTruckId() != null) {
-            Truck truck = truckRepository.findById(request.assignedTruckId())
+            Truck truck = truckRepository.findByIdAndCompanyId(request.assignedTruckId(), companyId)
                     .orElseThrow(() -> new RuntimeException("Truck not found with id: " + request.assignedTruckId()));
             driver.setAssignedTruck(truck);
         } else {
-            driver.setAssignedTruck(null); // Un-assign truck
+            driver.setAssignedTruck(null);
         }
 
         Driver updatedDriver = driverRepository.save(driver);
@@ -105,7 +111,9 @@ public class DriverServiceImpl implements DriverService {
                 driver.getLicenseNumber(),
                 driver.getContactNumber(),
                 driver.getAssignedTruck() != null ? driver.getAssignedTruck().getId() : null,
-                driver.getAssignedTruck() != null ? driver.getAssignedTruck().getLicensePlate() : null
+                driver.getAssignedTruck() != null ? driver.getAssignedTruck().getLicensePlate() : null,
+                driver.getCompany().getId(),
+                driver.getCompany().getName()
         );
     }
 }

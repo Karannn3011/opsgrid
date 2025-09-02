@@ -1,11 +1,13 @@
 package com.opsgrid.backend.controller;
 
+import com.opsgrid.backend.dto.CompanyRegistrationRequest;
 import com.opsgrid.backend.dto.JwtResponse;
 import com.opsgrid.backend.dto.LoginRequest;
 import com.opsgrid.backend.dto.SetPasswordRequest;
 import com.opsgrid.backend.service.JwtService;
 import com.opsgrid.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +31,16 @@ public class AuthController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+
+    @PostMapping("/register-company")
+    public ResponseEntity<?> registerCompany(@RequestBody CompanyRegistrationRequest registrationRequest) {
+        try {
+            userService.registerCompany(registrationRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Company registered successfully. The admin can now log in.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     @PostMapping("/set-password")
     public ResponseEntity<?> setPassword(@RequestBody SetPasswordRequest setPasswordRequest) {

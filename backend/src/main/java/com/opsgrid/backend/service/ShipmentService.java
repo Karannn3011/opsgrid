@@ -7,8 +7,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ShipmentService {
-    ShipmentDTO createShipment(CreateShipmentRequest request, UUID managerId);
-    List<ShipmentDTO> getAllShipments();
-    List<ShipmentDTO> getShipmentsForDriver(UUID driverId);
-    ShipmentDTO updateShipmentStatus(Integer shipmentId, ShipmentStatus status);
+    // All methods now require a companyId
+    ShipmentDTO createShipment(CreateShipmentRequest request, UUID managerId, Integer companyId);
+    List<ShipmentDTO> getAllShipments(Integer companyId);
+    List<ShipmentDTO> getShipmentsForDriver(UUID driverId, Integer companyId);
+    ShipmentDTO updateShipmentStatus(Integer shipmentId, ShipmentStatus status, Integer companyId);
 }
