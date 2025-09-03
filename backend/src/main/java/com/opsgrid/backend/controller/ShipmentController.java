@@ -7,6 +7,8 @@ import com.opsgrid.backend.entity.User;
 import com.opsgrid.backend.security.UserPrincipal; // Import this
 import com.opsgrid.backend.service.ShipmentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,15 +39,14 @@ public class ShipmentController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
-    public ResponseEntity<List<ShipmentDTO>> getAllShipments(@AuthenticationPrincipal UserPrincipal principal) {
-        return ResponseEntity.ok(shipmentService.getAllShipments(principal.getCompanyId()));
+    public ResponseEntity<Page<ShipmentDTO>> getAllShipments(@AuthenticationPrincipal UserPrincipal principal, Pageable pageable) {
+        return ResponseEntity.ok(shipmentService.getAllShipments(principal.getCompanyId(), pageable));
     }
 
     @GetMapping("/my-shipments")
     @PreAuthorize("hasRole('DRIVER')")
-    public ResponseEntity<List<ShipmentDTO>> getMyShipments(@AuthenticationPrincipal UserPrincipal principal) {
-        User driverUser = userRepository.findByUsername(principal.getUsername()).orElseThrow();
-        return ResponseEntity.ok(shipmentService.getShipmentsForDriver(driverUser.getId(), principal.getCompanyId()));
+    public ResponseEntity<Page<ShipmentDTO>> getMyShipments(@AuthenticationPrincipal UserPrincipal principal, Pageable pageable) {
+        return ResponseEntity.ok(shipmentService.getShipmentsForDriver(principal.getId(), principal.getCompanyId(), pageable));
     }
 
     @PutMapping("/{shipmentId}/status")

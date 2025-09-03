@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -24,21 +26,24 @@ public class TruckController {
 
     // POST /api/v1/trucks - Create a new truck [cite: 112]
     @PostMapping
-    public ResponseEntity<TruckDTO> createTruck(@RequestBody CreateTruckRequest request, @AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<TruckDTO> createTruck(@RequestBody CreateTruckRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
         TruckDTO newTruck = truckService.createTruck(request, principal.getCompanyId());
         return new ResponseEntity<>(newTruck, HttpStatus.CREATED);
     }
 
     // GET /api/v1/trucks - Get all trucks [cite: 112]
     @GetMapping
-    public ResponseEntity<List<TruckDTO>> getAllTrucks(@AuthenticationPrincipal UserPrincipal principal) {
-        List<TruckDTO> trucks = truckService.getAllTrucks(principal.getCompanyId());
+    public ResponseEntity<Page<TruckDTO>> getAllTrucks(@AuthenticationPrincipal UserPrincipal principal,
+            Pageable pageable) {
+        Page<TruckDTO> trucks = truckService.getAllTrucks(principal.getCompanyId(), pageable);
         return ResponseEntity.ok(trucks);
     }
 
     // GET /api/v1/trucks/{id} - Get a single truck by its ID [cite: 112]
     @GetMapping("/{id}")
-    public ResponseEntity<TruckDTO> getTruckById(@PathVariable Integer id, @AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<TruckDTO> getTruckById(@PathVariable Integer id,
+            @AuthenticationPrincipal UserPrincipal principal) {
         try {
             TruckDTO truck = truckService.getTruckById(id, principal.getCompanyId());
             return ResponseEntity.ok(truck);
@@ -49,7 +54,8 @@ public class TruckController {
 
     // PUT /api/v1/trucks/{id} - Update an existing truck [cite: 112]
     @PutMapping("/{id}")
-    public ResponseEntity<TruckDTO> updateTruck(@PathVariable Integer id, @RequestBody CreateTruckRequest request, @AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<TruckDTO> updateTruck(@PathVariable Integer id, @RequestBody CreateTruckRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
         try {
             TruckDTO updatedTruck = truckService.updateTruck(id, request, principal.getCompanyId());
             return ResponseEntity.ok(updatedTruck);
@@ -60,7 +66,8 @@ public class TruckController {
 
     // DELETE /api/v1/trucks/{id} - Delete a truck
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTruck(@PathVariable Integer id, @AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<Void> deleteTruck(@PathVariable Integer id,
+            @AuthenticationPrincipal UserPrincipal principal) {
         try {
             truckService.deleteTruck(id, principal.getCompanyId());
             return ResponseEntity.noContent().build(); // Standard response for successful delete

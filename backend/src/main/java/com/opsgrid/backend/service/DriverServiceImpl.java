@@ -13,6 +13,8 @@ import com.opsgrid.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page; // Import Page
+import org.springframework.data.domain.Pageable; // Import Pageable
 
 import java.util.List;
 import java.util.UUID;
@@ -65,10 +67,9 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public List<DriverDTO> getAllDrivers(Integer companyId) {
-        return driverRepository.findAllByCompanyId(companyId).stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    public Page<DriverDTO> getAllDrivers(Integer companyId, Pageable pageable) {
+        Page<Driver> driverPage = driverRepository.findAllByCompanyId(companyId, pageable);
+        return driverPage.map(this::convertToDto);
     }
 
     @Override

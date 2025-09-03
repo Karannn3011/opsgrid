@@ -27,6 +27,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final CompanyRepository companyRepository; // Inject CompanyRepository
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Override
     @Transactional // Use transaction to ensure all or nothing is saved
@@ -92,6 +93,7 @@ public class UserServiceImpl implements UserService {
 
         // 6. TODO: Send an email to the user with the invitation link
         // For now, we can log it to the console.
+        emailService.sendInvitationEmail(user.getEmail(), token);
         System.out.println("Invitation Link: http://localhost:3000/set-password?token=" + token);
 
         return user;

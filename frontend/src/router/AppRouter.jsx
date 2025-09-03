@@ -1,26 +1,34 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
-import LandingPage from '../pages/LandingPage';
-import LoginPage from '../pages/auth/LoginPage';
-import RegisterCompanyPage from '../pages/auth/RegisterCompanyPage';
-import SetPasswordPage from '../pages/auth/SetPasswordPage';
+import LandingPage from "../pages/LandingPage";
+import LoginPage from "../pages/auth/LoginPage";
+import RegisterCompanyPage from "../pages/auth/RegisterCompanyPage";
+import SetPasswordPage from "../pages/auth/SetPasswordPage";
 
 // Import Layout and Pages
-import DashboardLayout from '../components/layout/DashboardLayout';
-import TrucksPage from '../pages/dashboard/TrucksPage';
-import UsersPage from '../pages/dashboard/UsersPage'; // Import UsersPage
-import ProtectedRoute from './ProtectedRoute';
-import AdminRoute from './AdminRoute'; // Import AdminRoute
+import DashboardLayout from "../components/layout/DashboardLayout";
+import TrucksPage from "../pages/dashboard/TrucksPage";
+import UsersPage from "../pages/dashboard/UsersPage";
+import DriversPage from "../pages/dashboard/DriversPage";
+import ShipmentsPage from "../pages/dashboard/ShipmentsPage";
+import IssuesPage from "../pages/dashboard/IssuesPage"; // Import IssuesPage
+import ProtectedRoute from "./ProtectedRoute";
+import AdminRoute from "./AdminRoute";
 
 function AppRouter() {
   const { loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <p className="text-gray-700 dark:text-gray-300">Loading...</p>
+      <div className="flex min-h-screen items-center justify-center">
+        <p>Loading...</p>
       </div>
     );
   }
@@ -45,21 +53,19 @@ function AppRouter() {
         >
           <Route index element={<Navigate to="trucks" replace />} />
           <Route path="trucks" element={<TrucksPage />} />
-          <Route path="drivers" element={<div>Drivers Page Content</div>} />
-          <Route path="shipments" element={<div>Shipments Page Content</div>} />
-          <Route path="issues" element={<div>Issues Page Content</div>} />
-          
-          {/* Admin Only Route */}
-          <Route 
-            path="users" 
+          <Route path="drivers" element={<DriversPage />} />
+          <Route path="shipments" element={<ShipmentsPage />} />
+          <Route path="issues" element={<IssuesPage />} />{" "}
+          {/* Use new component */}
+          <Route
+            path="users"
             element={
               <AdminRoute>
                 <UsersPage />
               </AdminRoute>
-            } 
+            }
           />
         </Route>
-        
       </Routes>
     </Router>
   );

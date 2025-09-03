@@ -8,6 +8,8 @@ import com.opsgrid.backend.repository.UserRepository;
 import com.opsgrid.backend.security.UserPrincipal;
 import com.opsgrid.backend.service.IssueService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,10 +39,17 @@ public class IssueController {
         }
     }
 
+
     @GetMapping
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
-    public ResponseEntity<List<IssueDTO>> getAllIssues(@AuthenticationPrincipal UserPrincipal principal) {
-        return ResponseEntity.ok(issueService.getAllIssues(principal.getCompanyId()));
+    public ResponseEntity<Page<IssueDTO>> getAllIssues(@AuthenticationPrincipal UserPrincipal principal, Pageable pageable) {
+        return ResponseEntity.ok(issueService.getAllIssues(principal.getCompanyId(), pageable));
+    }
+
+    @GetMapping("/my-issues")
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<Page<IssueDTO>> getMyReportedIssues(@AuthenticationPrincipal UserPrincipal principal, Pageable pageable) {
+        return ResponseEntity.ok(issueService.getIssuesForDriver(principal.getId(), pageable));
     }
 
     @PutMapping("/{issueId}/status")

@@ -5,6 +5,8 @@ import com.opsgrid.backend.dto.ShipmentDTO;
 import com.opsgrid.backend.entity.*;
 import com.opsgrid.backend.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,16 +55,15 @@ public class ShipmentServiceImpl implements ShipmentService {
     }
 
     @Override
-    public List<ShipmentDTO> getAllShipments(Integer companyId) {
-        return shipmentRepository.findAllByCompanyId(companyId).stream().map(this::convertToDto).collect(Collectors.toList());
+    public Page<ShipmentDTO> getAllShipments(Integer companyId, Pageable pageable) {
+        Page<Shipment> shipmentPage = shipmentRepository.findAllByCompanyId(companyId, pageable);
+        return shipmentPage.map(this::convertToDto);
     }
 
     @Override
-    public List<ShipmentDTO> getShipmentsForDriver(UUID driverId, Integer companyId) {
-        return shipmentRepository.findByAssignedDriverIdAndCompanyId(driverId, companyId)
-                .stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+    public Page<ShipmentDTO> getShipmentsForDriver(UUID driverId, Integer companyId, Pageable pageable) {
+        Page<Shipment> shipmentPage = shipmentRepository.findByAssignedDriverIdAndCompanyId(driverId, companyId, pageable);
+        return shipmentPage.map(this::convertToDto);
     }
 
     @Override
