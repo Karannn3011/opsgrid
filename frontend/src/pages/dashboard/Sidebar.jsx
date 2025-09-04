@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Truck, Users, Package, AlertTriangle, UserCog } from 'lucide-react';
+import { Truck, Users, Package, AlertTriangle, UserCog, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext'; // Import useAuth
 
 const Sidebar = () => {
@@ -16,6 +16,10 @@ const Sidebar = () => {
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">OpsGrid</h1>
       </div>
       <nav className="flex-1 px-2 py-4 space-y-2">
+         <NavLink to="/dashboard" end className={({ isActive }) => `${linkClass} ${isActive ? activeLinkClass : ''}`}>
+            <LayoutDashboard className="mr-3 h-5 w-5" />
+            Dashboard
+        </NavLink>
         <NavLink to="/dashboard/trucks" className={({ isActive }) => `${linkClass} ${isActive ? activeLinkClass : ''}`}>
           <Truck className="mr-3 h-5 w-5" />
           Trucks

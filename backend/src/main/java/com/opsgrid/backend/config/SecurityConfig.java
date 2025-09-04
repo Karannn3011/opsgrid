@@ -22,7 +22,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Configuration
-@EnableMethodSecurity
+@EnableMethodSecurity // This annotation is crucial and enables @PreAuthorize
 public class SecurityConfig {
 
     private final AuthTokenFilter authTokenFilter;
@@ -37,19 +37,13 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
-    // NEW BEAN: Defines our CORS configuration
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // We allow the frontend origin
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        // We allow all standard methods
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // We allow all standard headers
         configuration.setAllowedHeaders(List.of("*"));
-        // This is important for authentication
         configuration.setAllowCredentials(true);
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -58,13 +52,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ENABLE CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .anyRequest().authenticated()
-                );
+                        .anyRequest().authenticated());
 
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 

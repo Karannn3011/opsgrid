@@ -21,6 +21,8 @@ import ShipmentsPage from "../pages/dashboard/ShipmentsPage";
 import IssuesPage from "../pages/dashboard/IssuesPage"; // Import IssuesPage
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
+import DashboardHomePage from '../pages/dashboard/DashboardHomePage'; // Import new page
+
 
 function AppRouter() {
   const { loading } = useAuth();
@@ -43,28 +45,14 @@ function AppRouter() {
         <Route path="/set-password" element={<SetPasswordPage />} />
 
         {/* Protected Dashboard Routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="trucks" replace />} />
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+          {/* UPDATED: Default route is now the dashboard home */}
+          <Route index element={<DashboardHomePage />} /> 
           <Route path="trucks" element={<TrucksPage />} />
           <Route path="drivers" element={<DriversPage />} />
           <Route path="shipments" element={<ShipmentsPage />} />
-          <Route path="issues" element={<IssuesPage />} />{" "}
-          {/* Use new component */}
-          <Route
-            path="users"
-            element={
-              <AdminRoute>
-                <UsersPage />
-              </AdminRoute>
-            }
-          />
+          <Route path="issues" element={<IssuesPage />} />
+          <Route path="users" element={<AdminRoute><UsersPage /></AdminRoute>} />
         </Route>
       </Routes>
     </Router>
