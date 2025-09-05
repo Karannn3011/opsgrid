@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface IncomeRepository extends JpaRepository<Income, Integer> {
     List<Income> findAllByCompanyIdAndIncomeDateAfter(Integer companyId, LocalDate ninetyDaysAgo);
+
+    List<Income> findAllByCompanyId(Integer companyId);
 }

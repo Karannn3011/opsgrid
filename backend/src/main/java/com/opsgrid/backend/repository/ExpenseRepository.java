@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Integer> {
     List<Expense> findAllByCompanyIdAndExpenseDateAfter(Integer companyId, LocalDate ninetyDaysAgo);
+
+    List<Expense> findAllByCompanyId(Integer companyId);
 }

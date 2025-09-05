@@ -2,6 +2,7 @@ package com.opsgrid.backend.controller;
 
 import com.opsgrid.backend.dto.CreateExpenseRequest;
 import com.opsgrid.backend.dto.ExpenseDTO;
+import com.opsgrid.backend.dto.FinanceRecordDTO;
 import com.opsgrid.backend.dto.IncomeDTO;
 import com.opsgrid.backend.security.UserPrincipal;
 import com.opsgrid.backend.service.FinanceService;
@@ -58,5 +59,11 @@ public class FinanceController {
     public ResponseEntity<Void> deleteIncome(@PathVariable Integer incomeId, @AuthenticationPrincipal UserPrincipal principal) {
         financeService.deleteIncome(incomeId, principal.getCompanyId());
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<Page<FinanceRecordDTO>> getAllFinanceRecords(@AuthenticationPrincipal UserPrincipal principal, Pageable pageable) {
+        Page<FinanceRecordDTO> records = financeService.getAllFinanceRecords(principal.getCompanyId(), pageable);
+        return ResponseEntity.ok(records);
     }
 }

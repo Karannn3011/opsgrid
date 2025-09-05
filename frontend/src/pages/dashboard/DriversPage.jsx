@@ -3,7 +3,7 @@ import api from "../../services/api";
 import DriversTable from "../../components/DriversTable";
 import Modal from "../../components/common/Modal";
 import DriverForm from "../../components/DriverForm";
-import PaginationControls from "../../components/common/PaginationControls"; // Import Pagination
+import PaginationControls from "../../components/common/PaginationControls";
 
 function DriversPage() {
   const [drivers, setDrivers] = useState([]);
@@ -27,22 +27,24 @@ function DriversPage() {
         `/drivers?page=${page}&size=${PAGE_SIZE}&sort=fullName,asc`,
       );
       const pageData = response.data;
-
       setDrivers(pageData.content);
       setTotalPages(pageData.totalPages);
       setCurrentPage(pageData.number);
       setError(null);
     } catch (err) {
       setError("Failed to fetch drivers.");
+      setTotalPages(0); // Reset pages on error
     } finally {
       setLoading(false);
     }
   }, []);
 
+  // useEffect now correctly handles fetching data when the page changes
   useEffect(() => {
     fetchDrivers(currentPage);
   }, [fetchDrivers, currentPage]);
 
+  // handlePageChange now only updates the state, triggering the useEffect
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
       setCurrentPage(newPage);
@@ -50,7 +52,12 @@ function DriversPage() {
   };
 
   const refreshAndCloseModals = () => {
-    fetchDrivers(currentPage);
+    // After a change, go back to the first page if not already there
+    if (currentPage === 0) {
+        fetchDrivers(0);
+    } else {
+        setCurrentPage(0);
+    }
     setIsCreateModalOpen(false);
     setIsEditModalOpen(false);
     setEditingDriver(null);
@@ -100,15 +107,16 @@ function DriversPage() {
       {!loading && !error && (
         <>
           <DriversTable drivers={drivers} onEdit={handleEditClick} />
-          <PaginationControls
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
+          {totalPages > 1 && (
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+          )}
         </>
       )}
 
-      {/* Modals are unchanged but their handlers are updated */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}

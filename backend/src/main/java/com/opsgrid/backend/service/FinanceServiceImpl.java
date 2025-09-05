@@ -1,9 +1,6 @@
 package com.opsgrid.backend.service;
 
-import com.opsgrid.backend.dto.CreateExpenseRequest;
-import com.opsgrid.backend.dto.CreateMaintenanceLogRequest;
-import com.opsgrid.backend.dto.ExpenseDTO;
-import com.opsgrid.backend.dto.IncomeDTO;
+import com.opsgrid.backend.dto.*;
 import com.opsgrid.backend.entity.*;
 import com.opsgrid.backend.repository.CompanyRepository;
 import com.opsgrid.backend.repository.ExpenseRepository;
@@ -12,8 +9,13 @@ import com.opsgrid.backend.repository.ShipmentRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -105,6 +107,43 @@ public class FinanceServiceImpl implements FinanceService {
             throw new RuntimeException("Income does not belong to this company");
         }
         incomeRepository.delete(income);
+    }
+
+    @Override
+    public Page<FinanceRecordDTO> getAllFinanceRecords(Integer companyId, Pageable pageable) {
+        List<Expense> expenses = expenseRepository.findAllByCompanyId(companyId);
+        List<Income> incomes = incomeRepository.findAllByCompanyId(companyId);
+
+        List<FinanceRecordDTO> allRecords = new ArrayList<>();
+
+        expenses.forEach(e -> allRecords.add(new FinanceRecordDTO(
+                e.getId(),
+                TransactionType.EXPENSE,
+                e.getDescription(),
+                e.getAmount(),
+                e.getExpenseDate(),
+                e.getCategory()
+        )));
+
+        incomes.forEach(i -> allRecords.add(new FinanceRecordDTO(
+                i.getId(),
+                TransactionType.INCOME,
+                i.getDescription(),
+                i.getAmount(),
+                i.getIncomeDate(),
+                null
+        )));
+
+        // Sort the combined list by date
+        allRecords.sort(Comparator.comparing(FinanceRecordDTO::date).reversed());
+
+        // Manual Pagination
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), allRecords.size());
+
+        List<FinanceRecordDTO> pageContent = allRecords.subList(start, end);
+
+        return new PageImpl<>(pageContent, pageable, allRecords.size());
     }
 
     private ExpenseDTO convertToDto(Expense expense) {

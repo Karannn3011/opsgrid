@@ -15,9 +15,7 @@ function FinancePage() {
     const isAdmin = user?.roles?.includes('ROLE_ADMIN');
 
     const [activeTab, setActiveTab] = useState('expenses');
-    const [expenses, setExpenses] = useState([]);
-    const [incomes, setIncomes] = useState([]);
-    const [allFinances, setAllFinances] = useState([]);
+    const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -28,77 +26,45 @@ function FinancePage() {
     const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
     const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-
-    const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'descending' });
+    
+    // This is no longer used for API calls, but kept for the client-side sorted table
+    const [sortConfig, setSortConfig] = useState(null); 
 
     const fetchData = useCallback(async (page) => {
         setLoading(true);
         setError(null);
+        let endpoint = `/finance/${activeTab}`;
+        
+        // --- START OF FIX ---
+        // Determine the correct sort property based on the active tab
+        let sortProperty = 'date'; // Default for 'all' tab
+        if (activeTab === 'expenses') {
+            sortProperty = 'expenseDate';
+        } else if (activeTab === 'incomes') {
+            sortProperty = 'incomeDate';
+        }
+        // --- END OF FIX ---
+
         try {
-            if (activeTab === 'all') {
-                const [expensesRes, incomesRes] = await Promise.all([
-                    api.get(`/finance/expenses?size=100&sort=expenseDate,desc`),
-                    api.get(`/finance/incomes?size=100&sort=incomeDate,desc`)
-                ]);
-
-                const formattedExpenses = expensesRes.data.content.map(e => ({...e, type: 'expense', date: e.expenseDate}));
-                const formattedIncomes = incomesRes.data.content.map(i => ({...i, type: 'income', date: i.incomeDate}));
-                
-                setAllFinances([...formattedExpenses, ...formattedIncomes]);
-                setTotalPages(1); 
-                setCurrentPage(0);
-
-            } else {
-                const endpoint = activeTab === 'expenses' ? '/finance/expenses' : '/finance/incomes';
-                const sortKey = activeTab === 'expenses' ? 'expenseDate' : 'incomeDate';
-                const response = await api.get(`${endpoint}?page=${page}&size=${PAGE_SIZE}&sort=${sortKey},desc`);
-                const pageData = response.data;
-
-                if (activeTab === 'expenses') {
-                    setExpenses(pageData.content);
-                } else {
-                    setIncomes(pageData.content);
-                }
-                setTotalPages(pageData.totalPages);
-                setCurrentPage(pageData.number);
-            }
+            // Use the correct sortProperty in the API call
+            const response = await api.get(`${endpoint}?page=${page}&size=${PAGE_SIZE}&sort=${sortProperty},desc`);
+            const pageData = response.data;
+            
+            setItems(pageData.content);
+            setTotalPages(pageData.totalPages);
+            setCurrentPage(pageData.number);
         } catch (err) {
             setError(`Failed to fetch ${activeTab}. Please try again.`);
+            setTotalPages(0);
         } finally {
             setLoading(false);
         }
     }, [activeTab]);
 
-    // This useEffect now correctly handles fetching data when the page or tab changes
     useEffect(() => {
         fetchData(currentPage); 
     }, [fetchData, currentPage]);
 
-    const sortedAllFinances = useMemo(() => {
-        let sortableItems = [...allFinances];
-        if (sortConfig !== null) {
-            sortableItems.sort((a, b) => {
-                if (a[sortConfig.key] < b[sortConfig.key]) {
-                    return sortConfig.direction === 'ascending' ? -1 : 1;
-                }
-                if (a[sortConfig.key] > b[sortConfig.key]) {
-                    return sortConfig.direction === 'ascending' ? 1 : -1;
-                }
-                return 0;
-            });
-        }
-        return sortableItems;
-    }, [allFinances, sortConfig]);
-
-    const requestSort = (key) => {
-        let direction = 'ascending';
-        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
-            direction = 'descending';
-        }
-        setSortConfig({ key, direction });
-    };
-
-    // Corrected handlePageChange: It now only updates the state.
     const handlePageChange = (newPage) => {
         if (newPage >= 0 && newPage < totalPages) {
             setCurrentPage(newPage);
@@ -113,7 +79,6 @@ function FinancePage() {
             
             setIsExpenseModalOpen(false);
             setIsIncomeModalOpen(false);
-            // Go back to the first page to see the new entry
             if (currentPage === 0) {
                 fetchData(0);
             } else {
@@ -140,7 +105,7 @@ function FinancePage() {
 
     const handleTabClick = (tabName) => {
         setActiveTab(tabName);
-        setCurrentPage(0); // Reset to first page when switching tabs
+        setCurrentPage(0);
     }
 
     const tabClass = (tabName) => 
@@ -152,6 +117,7 @@ function FinancePage() {
 
     return (
         <div>
+            {/* The rest of the component remains the same */}
             <div className="mb-6 flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold">Finance Management</h1>
@@ -175,11 +141,11 @@ function FinancePage() {
 
             {!loading && !error && (
                 <div>
-                    {activeTab === 'expenses' && <ExpensesTable expenses={expenses} onDelete={(id) => handleDelete('expense', id)} />}
-                    {activeTab === 'incomes' && <IncomesTable incomes={incomes} onDelete={(id) => handleDelete('income', id)} />}
-                    {activeTab === 'all' && <AllFinancesTable items={sortedAllFinances} requestSort={requestSort} sortConfig={sortConfig} />}
+                    {activeTab === 'expenses' && <ExpensesTable expenses={items} onDelete={(id) => handleDelete('expense', id)} />}
+                    {activeTab === 'incomes' && <IncomesTable incomes={items} onDelete={(id) => handleDelete('income', id)} />}
+                    {activeTab === 'all' && <AllFinancesTable items={items} />}
                     
-                    {activeTab !== 'all' && totalPages > 1 && (
+                    {totalPages > 1 && (
                         <PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
                     )}
                 </div>

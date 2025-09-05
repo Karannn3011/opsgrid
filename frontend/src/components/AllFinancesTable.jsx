@@ -52,7 +52,7 @@ const AllFinancesTable = ({ items, requestSort, sortConfig }) => {
               <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{item.description}</td>
               <td className="whitespace-nowrap px-6 py-4 text-sm">
                  <span className={`rounded-full px-2 py-1 text-xs font-semibold capitalize ${
-                    item.type === 'income' 
+                    item.type === 'INCOME' 
                     ? 'bg-green-100 text-green-800' 
                     : 'bg-red-100 text-red-800'
                  }`}>
@@ -60,9 +60,9 @@ const AllFinancesTable = ({ items, requestSort, sortConfig }) => {
                  </span>
               </td>
               <td className={`whitespace-nowrap px-6 py-4 text-sm font-semibold ${
-                  item.type === 'income' ? 'text-green-600' : 'text-red-600'
+                  item.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
               }`}>
-                {item.type === 'income' ? '+' : '-'}${item.amount.toFixed(2)}
+                {item.type === 'INCOME' ? '+' : '-'}${item.amount.toFixed(2)}
               </td>
             </tr>
           ))}
