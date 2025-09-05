@@ -9,8 +9,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +28,8 @@ public class DataSeeder implements CommandLineRunner {
     private final DriverRepository driverRepository;
     private final ShipmentRepository shipmentRepository;
     private final IssueRepository issueRepository;
+    private final ExpenseRepository expenseRepository;
+    private final IncomeRepository incomeRepository;
 
     @Override
     @Transactional
@@ -41,18 +44,18 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedCompanies() {
         Faker faker = new Faker(new Locale("en-US"));
-        
+
         // Create 2 distinct companies
         Company company1 = createCompany(faker.company().name() + " Transport");
         Company company2 = createCompany(faker.company().name() + " Freight");
 
         // Seed data for the first company
         seedDataForCompany(faker, company1);
-        
+
         // Seed data for the second company
         seedDataForCompany(faker, company2);
     }
-    
+
     private Company createCompany(String name) {
         Company company = new Company();
         company.setName(name);
@@ -92,9 +95,9 @@ public class DataSeeder implements CommandLineRunner {
         manager.setCompany(company);
         userRepository.save(manager);
 
-        // Drivers (15)
+        // Drivers (30)
         List<User> driverUsers = new ArrayList<>();
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 30; i++) {
             String firstName = faker.name().firstName();
             User driverUser = new User();
             driverUser.setUsername(firstName.toLowerCase() + "_" + company.getId() + i);
@@ -107,9 +110,9 @@ public class DataSeeder implements CommandLineRunner {
             driverUsers.add(userRepository.save(driverUser));
         }
 
-        // === Create Trucks (20) ===
+        // === Create Trucks (40) ===
         List<Truck> trucks = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 40; i++) {
             Truck truck = new Truck();
             truck.setLicensePlate(faker.regexify("[A-Z]{3}-[0-9]{3}"));
             truck.setMake(faker.options().option("Volvo", "Scania", "MAN", "Mercedes-Benz", "DAF", "Iveco"));
@@ -137,8 +140,8 @@ public class DataSeeder implements CommandLineRunner {
             drivers.add(driverRepository.save(driverProfile));
         }
 
-        // === Create Shipments (30) ===
-        for (int i = 0; i < 30; i++) {
+        // === Create Shipments (50) and link Incomes ===
+        for (int i = 0; i < 50; i++) {
             Shipment shipment = new Shipment();
             shipment.setDescription(faker.commerce().productName() + " Transport");
             shipment.setOrigin(faker.address().city());
@@ -148,30 +151,62 @@ public class DataSeeder implements CommandLineRunner {
             shipment.setAssignedTruck(trucks.get(faker.number().numberBetween(0, trucks.size())));
             shipment.setCreatedByManager(manager);
             shipment.setCompany(company);
-            shipment.setCreatedAt(faker.date().past(30, TimeUnit.DAYS).toInstant());
-            if (shipment.getStatus() == ShipmentStatus.DELIVERED || shipment.getStatus() == ShipmentStatus.CANCELLED) {
-                shipment.setCompletedAt(faker.date().past(15, TimeUnit.DAYS).toInstant());
+            shipment.setCreatedAt(faker.date().past(60, TimeUnit.DAYS).toInstant());
+
+            if (shipment.getStatus() == ShipmentStatus.DELIVERED) {
+                shipment.setCompletedAt(faker.date().past(30, TimeUnit.DAYS).toInstant());
+                Shipment savedShipment = shipmentRepository.save(shipment);
+
+                // Create a corresponding income for the delivered shipment
+                Income income = new Income();
+                income.setDescription("Payment for Shipment #" + savedShipment.getId());
+                income.setAmount(BigDecimal.valueOf(faker.number().randomDouble(2, 1500, 8000)));
+                income.setIncomeDate(faker.date().between(java.util.Date.from(savedShipment.getCompletedAt()), new java.util.Date()).toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+                income.setShipment(savedShipment);
+                income.setCompany(company);
+                incomeRepository.save(income);
+            } else {
+                shipmentRepository.save(shipment);
             }
-            shipmentRepository.save(shipment);
         }
 
-        // === Create Issues (10) ===
-        for (int i = 0; i < 10; i++) {
+        // === Create Issues (35) ===
+        for (int i = 0; i < 35; i++) {
             Issue issue = new Issue();
             Driver reportingDriver = drivers.get(faker.number().numberBetween(0, drivers.size()));
             issue.setTitle(faker.options().option("Engine Overheating", "Flat Tyre", "Brake System Warning", "Refrigeration Unit Failure", "GPS Malfunction"));
             issue.setDescription(faker.lorem().sentence());
-            issue.setStatus(faker.options().option(IssueStatus.OPEN, IssueStatus.RESOLVED));
+            issue.setStatus(faker.options().option(IssueStatus.OPEN, IssueStatus.RESOLVED, IssueStatus.ESCALATED));
             issue.setPriority(faker.options().option(IssuePriority.HIGH, IssuePriority.MEDIUM, IssuePriority.LOW));
             issue.setReportedByDriver(reportingDriver);
             if (reportingDriver.getAssignedTruck() != null) {
                 issue.setRelatedTruck(reportingDriver.getAssignedTruck());
             } else {
-                 issue.setRelatedTruck(trucks.get(faker.number().numberBetween(0, trucks.size())));
+                issue.setRelatedTruck(trucks.get(faker.number().numberBetween(0, trucks.size())));
             }
             issue.setAssignedToManager(manager);
             issue.setCompany(company);
             issueRepository.save(issue);
+        }
+
+        // === Create Expenses (40) ===
+        for (int i = 0; i < 40; i++) {
+            Expense expense = new Expense();
+            ExpenseCategory category = faker.options().option(ExpenseCategory.class);
+            expense.setCategory(category);
+            expense.setAmount(BigDecimal.valueOf(faker.number().randomDouble(2, 50, 1000)));
+            expense.setExpenseDate(faker.date().past(60, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+
+            if(category == ExpenseCategory.MAINTENANCE) {
+                expense.setDescription("Maintenance for Truck #" + trucks.get(faker.number().numberBetween(0, trucks.size())).getLicensePlate());
+            } else if (category == ExpenseCategory.FUEL) {
+                expense.setDescription("Fuel purchase");
+            } else {
+                expense.setDescription(faker.commerce().productName());
+            }
+
+            expense.setCompany(company);
+            expenseRepository.save(expense);
         }
 
         System.out.println("Data seeding for " + company.getName() + " completed.");

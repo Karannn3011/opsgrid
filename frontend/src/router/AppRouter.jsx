@@ -18,11 +18,12 @@ import TrucksPage from "../pages/dashboard/TrucksPage";
 import UsersPage from "../pages/dashboard/UsersPage";
 import DriversPage from "../pages/dashboard/DriversPage";
 import ShipmentsPage from "../pages/dashboard/ShipmentsPage";
-import IssuesPage from "../pages/dashboard/IssuesPage"; // Import IssuesPage
+import IssuesPage from "../pages/dashboard/IssuesPage";
+import FinancePage from "../pages/dashboard/FinancePage"; // Import FinancePage
+import MaintenancePage from "../pages/dashboard/MaintenancePage";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
-import DashboardHomePage from '../pages/dashboard/DashboardHomePage'; // Import new page
-
+import DashboardHomePage from "../pages/dashboard/DashboardHomePage";
 
 function AppRouter() {
   const { loading } = useAuth();
@@ -45,14 +46,30 @@ function AppRouter() {
         <Route path="/set-password" element={<SetPasswordPage />} />
 
         {/* Protected Dashboard Routes */}
-          <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-          {/* UPDATED: Default route is now the dashboard home */}
-          <Route index element={<DashboardHomePage />} /> 
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<DashboardHomePage />} />
           <Route path="trucks" element={<TrucksPage />} />
           <Route path="drivers" element={<DriversPage />} />
           <Route path="shipments" element={<ShipmentsPage />} />
           <Route path="issues" element={<IssuesPage />} />
-          <Route path="users" element={<AdminRoute><UsersPage /></AdminRoute>} />
+          <Route path="maintenance" element={<MaintenancePage />} />
+          <Route path="finance" element={<FinancePage />} />{" "}
+          {/* Add Finance Route */}
+          <Route
+            path="users"
+            element={
+              <AdminRoute>
+                <UsersPage />
+              </AdminRoute>
+            }
+          />
         </Route>
       </Routes>
     </Router>
