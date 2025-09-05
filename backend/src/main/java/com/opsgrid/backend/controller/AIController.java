@@ -1,5 +1,6 @@
 package com.opsgrid.backend.controller;
 
+import com.opsgrid.backend.dto.AIAnalysisRequest; // Import the new DTO
 import com.opsgrid.backend.entity.Issue;
 import com.opsgrid.backend.repository.IssueRepository;
 import com.opsgrid.backend.security.UserPrincipal;
@@ -13,6 +14,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/ai")
@@ -34,8 +37,24 @@ public class AIController {
         return aiService.getMaintenanceDiagnostics(issue)
                 .map(aiResponseText -> ResponseEntity
                         .ok()
-                        .contentType(MediaType.TEXT_PLAIN) // Set the correct content type
+                        .contentType(MediaType.TEXT_PLAIN)
                         .body(aiResponseText)
                 );
+    }
+
+    // Add this new endpoint
+    @PostMapping("/analyze-kpi-trend")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Mono<ResponseEntity<Map<String, String>>> analyzeKpiTrend( // Return type is now Map
+                                                                      @RequestBody AIAnalysisRequest request,
+                                                                      @AuthenticationPrincipal UserPrincipal principal) {
+
+        return aiService.getFinancialAnalysis(request.question(), principal.getCompanyId())
+                .map(aiResponseText -> {
+                    // Wrap the plain text response in a JSON object: { "response": "..." }
+                    Map<String, String> responseBody = Map.of("response", aiResponseText);
+                    // Return a standard JSON response
+                    return ResponseEntity.ok(responseBody);
+                });
     }
 }

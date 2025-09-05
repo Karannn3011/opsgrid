@@ -1,6 +1,10 @@
 package com.opsgrid.backend.service;
 
+import com.opsgrid.backend.entity.Expense;
+import com.opsgrid.backend.entity.Income;
 import com.opsgrid.backend.entity.Issue;
+import com.opsgrid.backend.repository.ExpenseRepository;
+import com.opsgrid.backend.repository.IncomeRepository;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.slf4j.Logger;
@@ -14,6 +18,9 @@ import reactor.netty.http.client.HttpClient;
 
 import javax.net.ssl.SSLException;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AIServiceImpl implements AIService {
@@ -24,9 +31,15 @@ public class AIServiceImpl implements AIService {
     @Value("${ai.service.url}")
     private String aiServiceBaseUrl;
 
-    public AIServiceImpl(WebClient.Builder webClientBuilder) throws SSLException {
+    // Inject the new repositories
+    private final ExpenseRepository expenseRepository;
+    private final IncomeRepository incomeRepository;
+
+    public AIServiceImpl(WebClient.Builder webClientBuilder, ExpenseRepository expenseRepository, IncomeRepository incomeRepository) throws SSLException {
+        this.expenseRepository = expenseRepository;
+        this.incomeRepository = incomeRepository;
         HttpClient httpClient = HttpClient.create()
-                .responseTimeout(Duration.ofSeconds(30))
+                .responseTimeout(Duration.ofSeconds(60)) // Increased timeout for potentially larger analysis
                 .secure(t -> {
                     try {
                         t.sslContext(SslContextBuilder.forClient()
@@ -48,15 +61,49 @@ public class AIServiceImpl implements AIService {
                 issue.getTitle(),
                 issue.getDescription()
         );
+        return callAIService(prompt);
+    }
 
-        String fullUrl = aiServiceBaseUrl + "/prompt/{prompt}";
-        logger.info("Sending AI prompt...");
+    @Override
+    public Mono<String> getFinancialAnalysis(String question, Integer companyId) {
+        // Fetch financial data from the last 90 days
+        LocalDate ninetyDaysAgo = LocalDate.now().minusDays(90);
+        List<Expense> expenses = expenseRepository.findAllByCompanyIdAndExpenseDateAfter(companyId, ninetyDaysAgo);
+        List<Income> incomes = incomeRepository.findAllByCompanyIdAndIncomeDateAfter(companyId, ninetyDaysAgo);
+
+        // Format the data into a simple string for the AI prompt
+        String expenseData = expenses.stream()
+                .map(e -> String.format("%s (%s): $%.2f", e.getExpenseDate(), e.getCategory(), e.getAmount()))
+                .collect(Collectors.joining(", "));
+
+        String incomeData = incomes.stream()
+                .map(i -> String.format("%s: $%.2f", i.getIncomeDate(), i.getAmount()))
+                .collect(Collectors.joining(", "));
+        logger.info(expenseData + incomeData);
+        // Construct the detailed prompt
+        String prompt = String.format(
+                "As a business analyst for a logistics company, answer the following question based on the provided financial data from the last 90 days. " +
+                        "Provide a concise, insightful answer. Question: '%s'. " +
+                        "Here is the data: " +
+                        "INCOMES: [%s]. " +
+                        "EXPENSES: [%s].",
+                question,
+                incomeData.isEmpty() ? "None" : incomeData,
+                expenseData.isEmpty() ? "None" : expenseData
+        );
+
+        return callAIService(prompt);
+    }
+
+    private Mono<String> callAIService(String prompt) {
+        String fullUrl = aiServiceBaseUrl + "/{prompt}";
+        logger.info("Sending AI prompt..." + fullUrl);
 
         return this.webClient.get()
                 .uri(fullUrl, prompt)
                 .retrieve()
-                .bodyToMono(String.class) // We now expect and return a simple String
-                .doOnSuccess(response -> logger.info("Successfully received AI response: " + response))
+                .bodyToMono(String.class)
+                .doOnSuccess(response -> logger.info("Successfully received AI response." + response))
                 .doOnError(error -> logger.error("Error calling AI service: ", error));
     }
 }

@@ -4,6 +4,8 @@ import com.opsgrid.backend.entity.Issue;
 import reactor.core.publisher.Mono;
 
 public interface AIService {
-    // Return type is now Mono<String>
     Mono<String> getMaintenanceDiagnostics(Issue issue);
+
+    // Add this new method
+    Mono<String> getFinancialAnalysis(String question, Integer companyId);
 }

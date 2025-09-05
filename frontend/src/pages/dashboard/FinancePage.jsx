@@ -1,14 +1,19 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import api from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 import ExpensesTable from '../../components/ExpensesTable';
 import IncomesTable from '../../components/IncomesTable';
-import AllFinancesTable from '../../components/AllFinancesTable'; // Import new table
+import AllFinancesTable from '../../components/AllFinancesTable';
 import PaginationControls from '../../components/common/PaginationControls';
 import Modal from '../../components/common/Modal';
 import ExpenseForm from '../../components/ExpenseForm';
 import IncomeForm from '../../components/IncomeForm';
+import AIAnalysis from '../../components/AIAnalysis';
 
 function FinancePage() {
+    const { user } = useAuth();
+    const isAdmin = user?.roles?.includes('ROLE_ADMIN');
+
     const [activeTab, setActiveTab] = useState('expenses');
     const [expenses, setExpenses] = useState([]);
     const [incomes, setIncomes] = useState([]);
@@ -16,17 +21,14 @@ function FinancePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Pagination State
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const PAGE_SIZE = 10;
     
-    // Modal and Form State
     const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
     const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
-    // Sorting State
     const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'descending' });
 
     const fetchData = useCallback(async (page) => {
@@ -43,7 +45,6 @@ function FinancePage() {
                 const formattedIncomes = incomesRes.data.content.map(i => ({...i, type: 'income', date: i.incomeDate}));
                 
                 setAllFinances([...formattedExpenses, ...formattedIncomes]);
-                // Pagination is disabled for the 'all' tab in this simple implementation
                 setTotalPages(1); 
                 setCurrentPage(0);
 
@@ -68,9 +69,10 @@ function FinancePage() {
         }
     }, [activeTab]);
 
+    // This useEffect now correctly handles fetching data when the page or tab changes
     useEffect(() => {
-        fetchData(0); 
-    }, [fetchData]);
+        fetchData(currentPage); 
+    }, [fetchData, currentPage]);
 
     const sortedAllFinances = useMemo(() => {
         let sortableItems = [...allFinances];
@@ -96,9 +98,10 @@ function FinancePage() {
         setSortConfig({ key, direction });
     };
 
+    // Corrected handlePageChange: It now only updates the state.
     const handlePageChange = (newPage) => {
         if (newPage >= 0 && newPage < totalPages) {
-            fetchData(newPage);
+            setCurrentPage(newPage);
         }
     };
     
@@ -110,7 +113,12 @@ function FinancePage() {
             
             setIsExpenseModalOpen(false);
             setIsIncomeModalOpen(false);
-            fetchData(0); 
+            // Go back to the first page to see the new entry
+            if (currentPage === 0) {
+                fetchData(0);
+            } else {
+                setCurrentPage(0);
+            }
         } catch (err) {
             console.error(`Failed to save ${type}`, err);
         } finally {
@@ -129,6 +137,11 @@ function FinancePage() {
             }
         }
     };
+
+    const handleTabClick = (tabName) => {
+        setActiveTab(tabName);
+        setCurrentPage(0); // Reset to first page when switching tabs
+    }
 
     const tabClass = (tabName) => 
         `px-4 py-2 text-sm font-medium rounded-md ${
@@ -152,9 +165,9 @@ function FinancePage() {
             </div>
 
             <div className="mb-6 flex space-x-2 border-b border-gray-200 dark:border-gray-700">
-                <button className={tabClass('expenses')} onClick={() => setActiveTab('expenses')}>Expenses</button>
-                <button className={tabClass('incomes')} onClick={() => setActiveTab('incomes')}>Incomes</button>
-                <button className={tabClass('all')} onClick={() => setActiveTab('all')}>All Finances</button>
+                <button className={tabClass('expenses')} onClick={() => handleTabClick('expenses')}>Expenses</button>
+                <button className={tabClass('incomes')} onClick={() => handleTabClick('incomes')}>Incomes</button>
+                <button className={tabClass('all')} onClick={() => handleTabClick('all')}>All Finances</button>
             </div>
 
             {loading && <p>Loading...</p>}
@@ -166,11 +179,13 @@ function FinancePage() {
                     {activeTab === 'incomes' && <IncomesTable incomes={incomes} onDelete={(id) => handleDelete('income', id)} />}
                     {activeTab === 'all' && <AllFinancesTable items={sortedAllFinances} requestSort={requestSort} sortConfig={sortConfig} />}
                     
-                    {activeTab !== 'all' && (
+                    {activeTab !== 'all' && totalPages > 1 && (
                         <PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
                     )}
                 </div>
             )}
+            
+            {isAdmin && <AIAnalysis />}
             
             <Modal isOpen={isExpenseModalOpen} onClose={() => setIsExpenseModalOpen(false)} title="Add New Expense">
                 <ExpenseForm onSave={(data) => handleSave('expense', data)} onCancel={() => setIsExpenseModalOpen(false)} submitting={submitting} />
