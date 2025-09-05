@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import api, { putWithTextBody } from "../../services/api";
+import axios from "axios";
+import api, { putWithTextBody, postWithoutBody } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 import IssuesTable from "../../components/IssuesTable";
 import Modal from "../../components/common/Modal";
@@ -34,12 +35,23 @@ function IssuesPage() {
     setIsAIDiagnosticsModalOpen(true);
     setIsAiLoading(true);
     setAiResponse("");
+
+    // 1. Define the AI service URL
+    const aiServiceUrl = "https://text.pollinations.ai";
+
+    // 2. Construct the prompt, just like we did on the backend
+    const prompt = `As an expert truck mechanic, a driver reported an issue. Title: '${issue.title}'. Provide a numbered list of 3 probable causes and a separate numbered list of 3 recommended actions. Just give required answer only, no greetings.`;
+
     try {
-      const response = await api.post(`/ai/diagnose-issue/${issue.id}`);
-      console.log(response);
-      setAiResponse(response.data.responseText);
+      // 3. Make a direct GET request to the AI service using axios
+      // We encode the prompt to make it URL-safe
+      const fullUrl = `${aiServiceUrl}/${encodeURIComponent(prompt)}`;
+      const response = await axios.get(fullUrl);
+
+      // 4. The response data is the plain text from the AI
+      setAiResponse(response.data);
     } catch (err) {
-      console.error("AI diagnosis failed:", err);
+      console.error("Direct AI diagnosis failed:", err);
       setAiResponse(null); // Indicate an error
     } finally {
       setIsAiLoading(false);

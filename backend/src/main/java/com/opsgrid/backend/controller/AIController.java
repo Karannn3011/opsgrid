@@ -1,6 +1,5 @@
 package com.opsgrid.backend.controller;
 
-import com.opsgrid.backend.dto.AIResponseDTO;
 import com.opsgrid.backend.entity.Issue;
 import com.opsgrid.backend.repository.IssueRepository;
 import com.opsgrid.backend.security.UserPrincipal;
@@ -25,20 +24,18 @@ public class AIController {
     private final IssueRepository issueRepository;
 
     @PostMapping("/diagnose-issue/{issueId}")
-    public Mono<ResponseEntity<AIResponseDTO>> diagnoseIssue(
+    public Mono<ResponseEntity<String>> diagnoseIssue(
             @PathVariable Integer issueId,
             @AuthenticationPrincipal UserPrincipal principal) {
 
-        // Find the issue first (synchronous part)
         Issue issue = issueRepository.findByIdAndCompanyId(issueId, principal.getCompanyId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Issue not found"));
 
-        // Call the reactive service and then manually build the ResponseEntity
         return aiService.getMaintenanceDiagnostics(issue)
-                .map(aiResponseDTO -> ResponseEntity
-                        .ok() // Set 200 OK status
-                        .contentType(MediaType.APPLICATION_JSON) // Explicitly set header to application/json
-                        .body(aiResponseDTO) // Set our DTO as the body
+                .map(aiResponseText -> ResponseEntity
+                        .ok()
+                        .contentType(MediaType.TEXT_PLAIN) // Set the correct content type
+                        .body(aiResponseText)
                 );
     }
 }

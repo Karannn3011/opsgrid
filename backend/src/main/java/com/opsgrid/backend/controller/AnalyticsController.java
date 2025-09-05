@@ -3,8 +3,11 @@ package com.opsgrid.backend.controller;
 import com.opsgrid.backend.dto.ShipmentStatusSummaryDTO;
 import com.opsgrid.backend.dto.TruckStatusSummaryDTO;
 import com.opsgrid.backend.security.UserPrincipal;
+import com.opsgrid.backend.service.AIServiceImpl;
 import com.opsgrid.backend.service.AnalyticsService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,6 +24,8 @@ import java.util.List;
 public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
+
+
 
     @GetMapping("/shipment-summary")
     public ResponseEntity<List<ShipmentStatusSummaryDTO>> getShipmentSummary(@AuthenticationPrincipal UserPrincipal principal) {
