@@ -7,8 +7,6 @@ import "./tailkit.css";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
-      {" "}
-      {/* Wrap the App component */}
       <App />
     </AuthProvider>
   </React.StrictMode>,
