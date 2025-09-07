@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
 /* Plugins */
 @plugin '@tailwindcss/forms';
@@ -149,6 +148,6 @@
     @apply cursor-pointer;
   }
   table {
-    @apply overflow-x-scroll
+    @apply overflow-x-scroll;
   }
 }
