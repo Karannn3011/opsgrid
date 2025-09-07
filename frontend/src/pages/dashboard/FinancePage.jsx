@@ -12,6 +12,9 @@ import AIAnalysis from '../../components/AIAnalysis';
 import {Loader} from "lucide-react"
 
 function FinancePage() {
+    useEffect(() => {
+        document.title = "OpsGrid | Finances"
+      }, [])
     const { user } = useAuth();
     const isAdmin = user?.roles?.includes('ROLE_ADMIN');
 

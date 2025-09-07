@@ -4,13 +4,16 @@ import Modal from "../../components/common/Modal";
 import InviteUserForm from "../../components/InviteUserForm";
 import UsersTable from "../../components/UsersTable";
 import PaginationControls from "../../components/common/PaginationControls";
-import {Loader} from "lucide-react"
+import { Loader } from "lucide-react";
 
 function UsersPage() {
+  useEffect(() => {
+    document.title = "OpsGrid | User Management";
+  }, []);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const PAGE_SIZE = 10;
@@ -21,7 +24,9 @@ function UsersPage() {
   const fetchUsers = useCallback(async (page) => {
     try {
       setLoading(true);
-      const response = await api.get(`/users?page=${page}&size=${PAGE_SIZE}&sort=createdAt,desc`);
+      const response = await api.get(
+        `/users?page=${page}&size=${PAGE_SIZE}&sort=createdAt,desc`
+      );
       const pageData = response.data;
       setUsers(pageData.content);
       setTotalPages(pageData.totalPages);
@@ -45,12 +50,14 @@ function UsersPage() {
 
   const handleUserInvited = () => {
     setIsModalOpen(false);
-    setInviteStatus("Invitation sent successfully! The user will receive an email shortly.");
+    setInviteStatus(
+      "Invitation sent successfully! The user will receive an email shortly."
+    );
     // Refresh the user list, going back to page 1
     if (currentPage === 0) {
-        fetchUsers(0);
+      fetchUsers(0);
     } else {
-        setCurrentPage(0);
+      setCurrentPage(0);
     }
     setTimeout(() => setInviteStatus(""), 5000);
   };
@@ -81,19 +88,19 @@ function UsersPage() {
       )}
 
       {(loading || error) && (
-    <div className="absolute flex top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 justify-center items-center p-8">
-        {loading ? (
+        <div className="absolute flex top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 justify-center items-center p-8">
+          {loading ? (
             <div className="flex flex-col items-center gap-2">
-                <Loader className="h-8 w-8 mx-auto animate-spin text-blue-600 scale-130" />
+              <Loader className="h-8 w-8 mx-auto animate-spin text-blue-600 scale-130" />
             </div>
-        ) : error ? (
+          ) : error ? (
             <p className="rounded-md bg-red-100 p-4 text-center text-red-700">
-                {error}
+              {error}
             </p>
-        ) : null}
-    </div>
-)}
-      
+          ) : null}
+        </div>
+      )}
+
       {!loading && !error && (
         <>
           <UsersTable users={users} />

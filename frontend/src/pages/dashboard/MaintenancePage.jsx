@@ -5,6 +5,9 @@ import PaginationControls from "../../components/common/PaginationControls";
 import {Loader} from "lucide-react"
 
 function MaintenancePage() {
+    useEffect(() => {
+        document.title = "OpsGrid | Maintenance Logs"
+      }, [])
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);

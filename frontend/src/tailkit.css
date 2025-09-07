@@ -1,8 +1,7 @@
 @import "tailwindcss";
-
-
-/* Class based dark mode */
-@custom-variant dark (&:where(.dark, .dark *));
+@plugin "@tailwindcss/typography";
+@plugin "@tailwindcss/forms";
+  /* Class based dark mode */ @custom-variant dark (&: where(.dark, .dark *));
 
 /* Enable hover on mobile */
 @custom-variant hover (&:hover);

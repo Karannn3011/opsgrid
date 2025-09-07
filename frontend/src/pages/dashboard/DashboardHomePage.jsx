@@ -5,6 +5,9 @@ import FleetStatusChart from '../../components/charts/FleetStatusChart'; // Impo
 import {Loader} from "lucide-react"
 
 function DashboardHomePage() {
+  useEffect(() => {
+      document.title = "OpsGrid | Dashboard"
+    }, [])
   const [shipmentSummary, setShipmentSummary] = useState([]);
   const [truckSummary, setTruckSummary] = useState([]); // State for new chart data
   const [loading, setLoading] = useState(true);

@@ -7,6 +7,9 @@ import PaginationControls from "../../components/common/PaginationControls";
 import {Loader} from "lucide-react"
 
 function DriversPage() {
+  useEffect(() => {
+      document.title = "OpsGrid | Drivers"
+    }, [])
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

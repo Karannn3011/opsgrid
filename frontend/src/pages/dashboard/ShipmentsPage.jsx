@@ -8,6 +8,9 @@ import PaginationControls from "../../components/common/PaginationControls"; // 
 import {Loader} from "lucide-react"
 
 function ShipmentsPage() {
+  useEffect(() => {
+      document.title = "OpsGrid | Shipments"
+    }, [])
   const [shipments, setShipments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

@@ -10,6 +10,9 @@ import AIDiagnosticsModal from "../../components/AIDiagnosticsModal"; // Import
 import {Loader} from "lucide-react"
 
 function IssuesPage() {
+  useEffect(() => {
+      document.title = "OpsGrid | Issues"
+    }, [])
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

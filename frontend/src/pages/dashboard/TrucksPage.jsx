@@ -7,6 +7,9 @@ import TruckForm from "../../components/TruckForm";
 import PaginationControls from "../../components/common/PaginationControls"; // Import Pagination
 
 function TrucksPage() {
+  useEffect(() => {
+      document.title = "OpsGrid | Trucks"
+    }, [])
   const [trucks, setTrucks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
