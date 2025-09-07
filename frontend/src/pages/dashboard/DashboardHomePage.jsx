@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import ShipmentStatusChart from '../../components/charts/ShipmentStatusChart';
 import FleetStatusChart from '../../components/charts/FleetStatusChart'; // Import the new chart
+import {Loader} from "lucide-react"
 
 function DashboardHomePage() {
   const [shipmentSummary, setShipmentSummary] = useState([]);
@@ -35,8 +36,19 @@ function DashboardHomePage() {
       <h1 className="text-2xl font-semibold">Dashboard Overview</h1>
       <p className="mt-1 text-gray-600">A quick summary of your company's logistics operations.</p>
       
-      {loading && <p className="mt-6 text-center">Loading dashboard...</p>}
-      {error && <p className="mt-6 text-center text-red-500">{error}</p>}
+     {(loading || error) && (
+    <div className="absolute flex top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 justify-center items-center p-8">
+        {loading ? (
+            <div className="flex flex-col items-center gap-2">
+                <Loader className="h-8 w-8 mx-auto animate-spin text-blue-600 scale-130" />
+            </div>
+        ) : error ? (
+            <p className="rounded-md bg-red-100 p-4 text-center text-red-700">
+                {error}
+            </p>
+        ) : null}
+    </div>
+)}
 
       {!loading && !error && (
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">

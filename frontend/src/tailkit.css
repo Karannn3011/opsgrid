@@ -145,4 +145,10 @@
   body {
     @apply bg-background text-foreground;
   }
+  button {
+    @apply cursor-pointer;
+  }
+  table {
+    @apply overflow-x-scroll
+  }
 }

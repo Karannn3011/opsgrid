@@ -4,6 +4,8 @@ import com.opsgrid.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query; // Import Query
 import org.springframework.data.repository.query.Param; // Import Param
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List; // Import List
 import java.util.Optional;
@@ -31,4 +33,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query("SELECT u FROM User u WHERE u.company.id = :companyId AND u.role.name = 'ROLE_DRIVER' AND u.id NOT IN (SELECT d.id FROM Driver d WHERE d.company.id = :companyId)")
     List<User> findUsersWithRoleDriverAndNoDriverProfile(@Param("companyId") Integer companyId);
+
+    Page<User> findAllByCompanyId(Integer companyId, Pageable pageable);
 }

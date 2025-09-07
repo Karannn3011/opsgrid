@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import {Loader} from "lucide-react"
 import api from "../../services/api";
 import TrucksTable from "../../components/TrucksTable";
 import Modal from "../../components/common/Modal";
@@ -133,13 +134,20 @@ function TrucksPage() {
         </button>
       </div>
 
-      {loading && <p>Loading fleet...</p>}
-      {error && (
-        <p className="rounded-md bg-red-100 p-4 text-center text-red-700">
-          {error}
-        </p>
-      )}
-
+      {/* Spinner and Error Handling Block */}
+{(loading || error) && (
+    <div className="absolute flex top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 justify-center items-center p-8">
+        {loading ? (
+            <div className="flex flex-col items-center gap-2">
+                <Loader className="h-8 w-8 mx-auto animate-spin text-blue-600 scale-130" />
+            </div>
+        ) : error ? (
+            <p className="rounded-md bg-red-100 p-4 text-center text-red-700">
+                {error}
+            </p>
+        ) : null}
+    </div>
+)}
       {!loading && !error && (
         <>
           <TrucksTable

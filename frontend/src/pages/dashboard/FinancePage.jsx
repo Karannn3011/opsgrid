@@ -9,6 +9,7 @@ import Modal from '../../components/common/Modal';
 import ExpenseForm from '../../components/ExpenseForm';
 import IncomeForm from '../../components/IncomeForm';
 import AIAnalysis from '../../components/AIAnalysis';
+import {Loader} from "lucide-react"
 
 function FinancePage() {
     const { user } = useAuth();
@@ -136,8 +137,19 @@ function FinancePage() {
                 <button className={tabClass('all')} onClick={() => handleTabClick('all')}>All Finances</button>
             </div>
 
-            {loading && <p>Loading...</p>}
-            {error && <p className="text-red-500 text-center p-4">{error}</p>}
+           {(loading || error) && (
+    <div className="absolute flex top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 justify-center items-center p-8">
+        {loading ? (
+            <div className="flex flex-col items-center gap-2">
+                <Loader className="h-8 w-8 mx-auto animate-spin text-blue-600 scale-130" />
+            </div>
+        ) : error ? (
+            <p className="rounded-md bg-red-100 p-4 text-center text-red-700">
+                {error}
+            </p>
+        ) : null}
+    </div>
+)}
 
             {!loading && !error && (
                 <div>

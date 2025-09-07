@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api";
 import MaintenanceLogTable from "../../components/MaintenanceLogTable";
 import PaginationControls from "../../components/common/PaginationControls";
+import {Loader} from "lucide-react"
 
 function MaintenancePage() {
     const [logs, setLogs] = useState([]);
@@ -95,8 +96,19 @@ function MaintenancePage() {
                 </select>
             </div>
             
-            {loading && <p>Loading logs...</p>}
-            {error && <p className="p-4 text-center text-red-500">{error}</p>}
+            {(loading || error) && (
+    <div className="absolute flex top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 justify-center items-center p-8">
+        {loading ? (
+            <div className="flex flex-col items-center gap-2">
+                <Loader className="h-8 w-8 mx-auto animate-spin text-blue-600 scale-130" />
+            </div>
+        ) : error ? (
+            <p className="rounded-md bg-red-100 p-4 text-center text-red-700">
+                {error}
+            </p>
+        ) : null}
+    </div>
+)}
 
             {!loading && !error && (
                 <>

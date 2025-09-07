@@ -38,9 +38,9 @@ const ShipmentsTable = ({ shipments, onUpdateStatus }) => {
             <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-300">
               Status
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-300">
+            {isDriver && <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-300">
               Actions
-            </th>
+            </th>}
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
@@ -61,7 +61,7 @@ const ShipmentsTable = ({ shipments, onUpdateStatus }) => {
               <td className="whitespace-nowrap px-6 py-4 text-sm">
                 <ShipmentStatusBadge status={shipment.status} />
               </td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm">
+              {isDriver && <td className="whitespace-nowrap px-6 py-4 text-sm">
                 {isDriver &&
                   (shipment.status === "PENDING" ||
                     shipment.status === "IN_TRANSIT") && (
@@ -83,12 +83,7 @@ const ShipmentsTable = ({ shipments, onUpdateStatus }) => {
                       )}
                     </select>
                   )}
-                {!isDriver && (
-                  <span className="text-xs text-gray-400">
-                    Driver updates status
-                  </span>
-                )}
-              </td>
+              </td>}
             </tr>
           ))}
         </tbody>
