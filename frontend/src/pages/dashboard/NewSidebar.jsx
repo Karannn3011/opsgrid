@@ -139,15 +139,7 @@ export default function NewSidebar() {
           </SidebarGroup>
         )}
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={logout} icon={<LogOut />}>
-              Logout
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
+      
     </Sidebar>
   );
 }
