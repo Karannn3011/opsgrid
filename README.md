@@ -2,7 +2,7 @@
 
 OpsGrid is a comprehensive, multi-tenant logistics management platform designed to streamline fleet, driver, shipment, and maintenance operations. It provides a centralized dashboard for managing all aspects of a logistics company, from tracking shipments to monitoring finances.
 
-![OpsGrid Dashboard](https://ibb.co/zTh4qhHk) ## Key Features
+![OpsGrid Dashboard](https://i.ibb.co/S4X3FX7L/opsgridss.png) ## Key Features
 
 * **Fleet Management:** Add, edit, and track all vehicles in your fleet, monitoring their status (working, in repair, out of service) and other details.
 * **Driver Management:** Maintain a database of all drivers, assign them to trucks, and manage their profiles.
