@@ -23,7 +23,7 @@ public class FinanceController {
 
     private final FinanceService financeService;
 
-    // Expenses Endpoints
+    
     @GetMapping("/expenses")
     public ResponseEntity<Page<ExpenseDTO>> getExpenses(@AuthenticationPrincipal UserPrincipal principal, Pageable pageable) {
         Page<ExpenseDTO> expenses = financeService.getExpenses(principal.getCompanyId(), pageable);
@@ -42,7 +42,7 @@ public class FinanceController {
         return ResponseEntity.noContent().build();
     }
 
-    // Income Endpoints
+    
     @GetMapping("/incomes")
     public ResponseEntity<Page<IncomeDTO>> getIncomes(@AuthenticationPrincipal UserPrincipal principal, Pageable pageable) {
         Page<IncomeDTO> incomes = financeService.getIncomes(principal.getCompanyId(), pageable);

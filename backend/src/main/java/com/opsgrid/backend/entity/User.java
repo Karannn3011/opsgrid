@@ -21,7 +21,7 @@ public class User {
     @Column(length = 50, unique = true, nullable = false)
     private String username;
 
-    @Column(length = 100) // Now nullable, as it will be set by the user later
+    @Column(length = 100) 
     private String password;
 
     @Column(length = 50, unique = true, nullable = false)
@@ -30,7 +30,7 @@ public class User {
     @Column(length = 100, unique = true, nullable = false)
     private String email;
 
-    @Enumerated(EnumType.STRING) // Store the enum as a string ('PENDING', 'ACTIVE')
+    @Enumerated(EnumType.STRING) 
     @Column(length = 20, nullable = false)
     private UserStatus status;
 
@@ -43,7 +43,7 @@ public class User {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    // NEW FIELD: Link to the Company
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Building, UserPlus } from 'lucide-react'; // Import icons
+import { Building, UserPlus } from 'lucide-react'; 
 
 function RegisterCompanyPage() {
     useEffect(() => {
@@ -16,7 +16,7 @@ function RegisterCompanyPage() {
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [loading, setLoading] = useState(false); // Add loading state
+    const [loading, setLoading] = useState(false); 
     const { registerCompany } = useAuth();
     const navigate = useNavigate();
 
@@ -29,7 +29,7 @@ function RegisterCompanyPage() {
         e.preventDefault();
         setError('');
         setSuccess('');
-        setLoading(true); // Start loading
+        setLoading(true); 
         try {
             await registerCompany(formData);
             setSuccess('Registration successful! You will be redirected to login shortly.');
@@ -37,7 +37,7 @@ function RegisterCompanyPage() {
         } catch (err) {
             setError(err.response?.data || 'Failed to register. Please try again.');
             console.error(err);
-            setLoading(false); // Stop loading on error
+            setLoading(false); 
         }
     };
 

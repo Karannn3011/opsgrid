@@ -2,7 +2,7 @@ package com.opsgrid.backend.controller;
 
 import com.opsgrid.backend.dto.CreateDriverRequest;
 import com.opsgrid.backend.dto.DriverDTO;
-import com.opsgrid.backend.security.UserPrincipal; // Import UserPrincipal
+import com.opsgrid.backend.security.UserPrincipal; 
 import com.opsgrid.backend.service.DriverService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal; // Import this
+import org.springframework.security.core.annotation.AuthenticationPrincipal; 
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

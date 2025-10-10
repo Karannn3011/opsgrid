@@ -9,9 +9,9 @@ import java.util.Optional;
 
 public interface MaintenanceLogRepository extends JpaRepository<MaintenanceLog, Integer> {
 
-    // Find all logs for a specific truck within a company, with pagination
+    
     Page<MaintenanceLog> findByCompanyIdAndTruckId(Integer companyId, Integer truckId, Pageable pageable);
 
-    // Find a single log by its ID and company ID for security
+    
     Optional<MaintenanceLog> findByIdAndCompanyId(Integer id, Integer companyId);
 }

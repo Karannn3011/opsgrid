@@ -18,7 +18,7 @@ public record ShipmentDTO(
         String createdByManagerUsername,
         Instant createdAt,
         Instant completedAt,
-        // ADDED COMPANY INFO
+        
         Integer companyId,
         String companyName
 ) {}

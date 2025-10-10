@@ -8,7 +8,7 @@ import com.opsgrid.backend.entity.User;
 public interface UserService {
     User registerCompany(CompanyRegistrationRequest registrationRequest);
 
-    // MODIFIED METHOD SIGNATURE
+    
     User inviteUser(InviteUserRequest inviteRequest, Integer companyId);
 
     void setPassword(SetPasswordRequest setPasswordRequest);

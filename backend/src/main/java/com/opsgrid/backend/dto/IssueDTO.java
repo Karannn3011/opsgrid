@@ -6,7 +6,7 @@ import com.opsgrid.backend.entity.IssueStatus;
 import java.time.Instant;
 import java.util.UUID;
 
-// DTO for representing a full issue in API responses.
+
 public record IssueDTO(
         Integer id,
         String title,
@@ -20,7 +20,7 @@ public record IssueDTO(
         Integer relatedTruckId,
         String relatedTruckLicensePlate,
         Instant createdAt,
-        // ADDED COMPANY INFO
+        
         Integer companyId,
         String companyName
 ) {}

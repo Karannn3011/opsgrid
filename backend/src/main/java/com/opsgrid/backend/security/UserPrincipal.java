@@ -7,15 +7,15 @@ import java.util.UUID;
 
 public class UserPrincipal extends User {
     private final Integer companyId;
-    private final UUID id; // Add this
+    private final UUID id; 
 
     public UserPrincipal(UUID id, String username, String password, Integer companyId, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);
         this.companyId = companyId;
-        this.id = id; // Add this
+        this.id = id; 
     }
 
-    public UUID getId() { // Add this
+    public UUID getId() { 
         return id;
     }
 

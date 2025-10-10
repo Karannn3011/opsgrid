@@ -21,7 +21,7 @@ public class IssueServiceImpl implements IssueService {
         private final IssueRepository issueRepository;
         private final DriverRepository driverRepository;
         private final TruckRepository truckRepository;
-        private final UserRepository userRepository; // To find a manager
+        private final UserRepository userRepository; 
         private final CompanyRepository companyRepository;
 
         @Override
@@ -30,18 +30,18 @@ public class IssueServiceImpl implements IssueService {
                 Company company = companyRepository.findById(companyId)
                                 .orElseThrow(() -> new RuntimeException("Company not found: " + companyId));
 
-                // Ensure driver and truck belong to the same company
+                
                 Driver driver = driverRepository.findByIdAndCompanyId(driverId, companyId)
                                 .orElseThrow(() -> new RuntimeException("Driver not found in this company"));
                 Truck truck = truckRepository.findByIdAndCompanyId(request.relatedTruckId(), companyId)
                                 .orElseThrow(() -> new RuntimeException("Truck not found in this company"));
 
-                // Find a manager within the SAME company to assign the issue to.
+                
                 User manager = userRepository.findFirstByCompanyIdAndRole_Name(companyId, "ROLE_MANAGER")
                                 .orElseThrow(() -> new RuntimeException(
                                                 "No manager found in this company to assign the issue to."));
 
-                // 4. Create and save the new issue
+                
                 Issue issue = new Issue();
                 issue.setTitle(request.title());
                 issue.setDescription(request.description());
@@ -50,7 +50,7 @@ public class IssueServiceImpl implements IssueService {
                 issue.setReportedByDriver(driver);
                 issue.setRelatedTruck(truck);
                 issue.setAssignedToManager(manager);
-                issue.setCompany(company); // Set the company
+                issue.setCompany(company); 
 
                 Issue savedIssue = issueRepository.save(issue);
                 return convertToDto(savedIssue);
@@ -85,7 +85,7 @@ public class IssueServiceImpl implements IssueService {
                 return convertToDto(updatedIssue);
         }
 
-        // Helper method to convert the complex Issue entity to a DTO
+        
         private IssueDTO convertToDto(Issue issue) {
                 return new IssueDTO(
                                 issue.getId(),

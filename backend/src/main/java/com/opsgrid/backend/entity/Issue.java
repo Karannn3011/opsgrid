@@ -44,7 +44,7 @@ public class Issue {
     @JoinColumn(name = "related_truck_id")
     private Truck relatedTruck;
 
-    // NEW FIELD: Link to the Company
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;

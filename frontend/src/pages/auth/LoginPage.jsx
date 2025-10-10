@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { LogIn } from "lucide-react"; // Import an icon for the button
+import { LogIn } from "lucide-react"; 
 
 function LoginPage() {
   useEffect(() => {
@@ -10,21 +10,21 @@ function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false); 
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setLoading(true); // Start loading
+    setLoading(true); 
     try {
       await login(username, password);
       navigate("/dashboard");
     } catch (err) {
       setError("Failed to log in. Please check your credentials.");
       console.error(err);
-      setLoading(false); // Stop loading on error
+      setLoading(false); 
     }
   };
 

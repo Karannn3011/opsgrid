@@ -16,5 +16,5 @@ public interface IssueService {
     IssueDTO updateIssueStatus(Integer issueId, IssueStatus status, Integer companyId);
     Page<IssueDTO> getAllIssues(Integer companyId, Pageable pageable);
     Page<IssueDTO> getIssuesForDriver(UUID driverId, Pageable pageable);
-    // We could also add methods like assignIssueToManager, etc. later
+    
 }

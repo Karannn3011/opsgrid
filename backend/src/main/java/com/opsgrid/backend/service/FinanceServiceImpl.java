@@ -29,12 +29,12 @@ public class FinanceServiceImpl implements FinanceService {
 
     @Override
     public Page<ExpenseDTO> getExpenses(Integer companyId, Pageable pageable) {
-        // This is a placeholder for a more complex query if needed
+        
         return expenseRepository.findAll(pageable).map(this::convertToDto);
     }
 
     @Override
-    @Transactional // Ensure both operations succeed or fail together
+    @Transactional 
     public ExpenseDTO createExpense(CreateExpenseRequest expenseRequest, Integer companyId) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company not found"));
@@ -48,7 +48,7 @@ public class FinanceServiceImpl implements FinanceService {
 
         Expense savedExpense = expenseRepository.save(expense);
 
-        // Smartly create a maintenance log if the category is MAINTENANCE
+        
         if (expenseRequest.category() == ExpenseCategory.MAINTENANCE && expenseRequest.truckId() != null) {
             CreateMaintenanceLogRequest logRequest = new CreateMaintenanceLogRequest(
                     expenseRequest.truckId(),
@@ -74,7 +74,7 @@ public class FinanceServiceImpl implements FinanceService {
 
     @Override
     public Page<IncomeDTO> getIncomes(Integer companyId, Pageable pageable) {
-        // This is a placeholder for a more complex query if needed
+        
         return incomeRepository.findAll(pageable).map(this::convertToDto);
     }
 
@@ -134,10 +134,10 @@ public class FinanceServiceImpl implements FinanceService {
                 null
         )));
 
-        // Sort the combined list by date
+        
         allRecords.sort(Comparator.comparing(FinanceRecordDTO::date).reversed());
 
-        // Manual Pagination
+        
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), allRecords.size());
 

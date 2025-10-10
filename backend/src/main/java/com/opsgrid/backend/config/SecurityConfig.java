@@ -22,7 +22,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Configuration
-@EnableMethodSecurity // This annotation is crucial and enables @PreAuthorize
+@EnableMethodSecurity 
 public class SecurityConfig {
 
     private final AuthTokenFilter authTokenFilter;
@@ -40,7 +40,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://opsgrid.vercel.app"));
+        configuration.setAllowedOrigins(List.of("http:
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

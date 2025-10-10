@@ -2,12 +2,12 @@ package com.opsgrid.backend.repository;
 
 import com.opsgrid.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query; // Import Query
-import org.springframework.data.repository.query.Param; // Import Param
+import org.springframework.data.jpa.repository.Query; 
+import org.springframework.data.repository.query.Param; 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List; // Import List
+import java.util.List; 
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,7 +16,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByEmail(String email);
 
-    // CORRECTED LINE: Changed Optional<Object> to Optional<User>
+    
     Optional<User> findByInvitationToken(String token);
 
     Optional<User> findByUsername(String username);
