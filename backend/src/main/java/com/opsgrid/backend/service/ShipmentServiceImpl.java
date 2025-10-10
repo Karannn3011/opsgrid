@@ -31,7 +31,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company not found with id: " + companyId));
 
-        // Ensure the manager, driver, and truck all belong to the same company
+        
         User manager = userRepository.findByIdAndCompanyId(managerId, companyId)
                 .orElseThrow(() -> new RuntimeException("Manager not found in this company"));
         Driver driver = driverRepository.findByIdAndCompanyId(request.assignedDriverId(), companyId)
@@ -39,7 +39,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         Truck truck = truckRepository.findByIdAndCompanyId(request.assignedTruckId(), companyId)
                 .orElseThrow(() -> new RuntimeException("Truck not found in this company"));
 
-        // 4. Create and save the new shipment
+        
         Shipment shipment = new Shipment();
         shipment.setDescription(request.description());
         shipment.setOrigin(request.origin());
@@ -47,7 +47,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         shipment.setCreatedByManager(manager);
         shipment.setAssignedDriver(driver);
         shipment.setAssignedTruck(truck);
-        shipment.setStatus(ShipmentStatus.PENDING); // Initial status
+        shipment.setStatus(ShipmentStatus.PENDING); 
         shipment.setCompany(company);
 
         Shipment savedShipment = shipmentRepository.save(shipment);
@@ -82,7 +82,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     }
 
 
-    // Helper to convert the complex Shipment entity to a DTO
+    
     private ShipmentDTO convertToDto(Shipment shipment) {
         return new ShipmentDTO(
                 shipment.getId(),

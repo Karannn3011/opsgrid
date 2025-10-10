@@ -21,7 +21,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> inviteUser(@RequestBody InviteUserRequest inviteRequest, @AuthenticationPrincipal UserPrincipal principal) {
         try {
-            // Pass the admin's companyId to the service
+            
             userService.inviteUser(inviteRequest, principal.getCompanyId());
             return ResponseEntity.status(HttpStatus.CREATED).body("User invited successfully.");
         } catch (RuntimeException e) {

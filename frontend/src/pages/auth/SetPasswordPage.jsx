@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import api from "../../services/api";
-import { KeyRound } from "lucide-react"; // Import an icon
+import { KeyRound } from "lucide-react"; 
 
 function SetPasswordPage() {
   useEffect(() => {
@@ -12,7 +12,7 @@ function SetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false); 
   const navigate = useNavigate();
 
   const token = searchParams.get("token");
@@ -35,7 +35,7 @@ function SetPasswordPage() {
       return;
     }
     
-    setLoading(true); // Start loading
+    setLoading(true); 
     try {
       const response = await api.post("/auth/set-password", { token, password });
       setSuccess(response.data + " Redirecting to login...");
@@ -46,7 +46,7 @@ function SetPasswordPage() {
       setError(err.response?.data || "Failed to set password. The token may be invalid or expired.");
       console.error(err);
     } finally {
-        setLoading(false); // Stop loading
+        setLoading(false); 
     }
   };
 

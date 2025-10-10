@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import ShipmentStatusChart from '../../components/charts/ShipmentStatusChart';
-import FleetStatusChart from '../../components/charts/FleetStatusChart'; // Import the new chart
+import FleetStatusChart from '../../components/charts/FleetStatusChart'; 
 import {Loader} from "lucide-react"
 
 function DashboardHomePage() {
@@ -9,7 +9,7 @@ function DashboardHomePage() {
       document.title = "OpsGrid | Dashboard"
     }, [])
   const [shipmentSummary, setShipmentSummary] = useState([]);
-  const [truckSummary, setTruckSummary] = useState([]); // State for new chart data
+  const [truckSummary, setTruckSummary] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -17,7 +17,7 @@ function DashboardHomePage() {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        // Use Promise.all to fetch both datasets in parallel
+        
         const [shipmentRes, truckRes] = await Promise.all([
           api.get('/analytics/shipment-summary'),
           api.get('/analytics/truck-summary')

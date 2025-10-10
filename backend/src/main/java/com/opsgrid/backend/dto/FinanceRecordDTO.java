@@ -11,5 +11,5 @@ public record FinanceRecordDTO(
         String description,
         BigDecimal amount,
         LocalDate date,
-        ExpenseCategory category // Can be null for income
+        ExpenseCategory category 
 ) {}

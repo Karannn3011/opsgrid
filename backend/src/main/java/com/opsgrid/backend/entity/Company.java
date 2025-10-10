@@ -20,8 +20,8 @@ public class Company {
     @Column(length = 100, unique = true, nullable = false)
     private String name;
 
-    // We can add more company-specific fields here later,
-    // e.g., address, contact_person, subscription_status, etc.
+    
+    
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

@@ -5,17 +5,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "roles") // Maps this entity to the 'roles' table
+@Table(name = "roles") 
 @Data
 @NoArgsConstructor
 public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    // Corresponds to 'id SERIAL PRIMARY KEY' [cite: 169]
+    
     private Integer id;
 
     @Column(length = 20, unique = true, nullable = false)
-    // Corresponds to 'name VARCHAR(20) UNIQUE NOT NULL' [cite: 170]
+    
     private String name;
 }

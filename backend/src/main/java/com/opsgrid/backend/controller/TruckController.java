@@ -16,15 +16,15 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/trucks") // Base path for all truck endpoints [cite: 112]
+@RequestMapping("/api/v1/trucks") 
 @RequiredArgsConstructor
-// Secure all methods in this controller. Only Managers or Admins can access.
+
 @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
 public class TruckController {
 
     private final TruckService truckService;
 
-    // POST /api/v1/trucks - Create a new truck [cite: 112]
+    
     @PostMapping
     public ResponseEntity<TruckDTO> createTruck(@RequestBody CreateTruckRequest request,
             @AuthenticationPrincipal UserPrincipal principal) {
@@ -32,7 +32,7 @@ public class TruckController {
         return new ResponseEntity<>(newTruck, HttpStatus.CREATED);
     }
 
-    // GET /api/v1/trucks - Get all trucks [cite: 112]
+    
     @GetMapping
     public ResponseEntity<Page<TruckDTO>> getAllTrucks(@AuthenticationPrincipal UserPrincipal principal,
             Pageable pageable) {
@@ -40,7 +40,7 @@ public class TruckController {
         return ResponseEntity.ok(trucks);
     }
 
-    // GET /api/v1/trucks/{id} - Get a single truck by its ID [cite: 112]
+    
     @GetMapping("/{id}")
     public ResponseEntity<TruckDTO> getTruckById(@PathVariable Integer id,
             @AuthenticationPrincipal UserPrincipal principal) {
@@ -52,7 +52,7 @@ public class TruckController {
         }
     }
 
-    // PUT /api/v1/trucks/{id} - Update an existing truck [cite: 112]
+    
     @PutMapping("/{id}")
     public ResponseEntity<TruckDTO> updateTruck(@PathVariable Integer id, @RequestBody CreateTruckRequest request,
             @AuthenticationPrincipal UserPrincipal principal) {
@@ -64,13 +64,13 @@ public class TruckController {
         }
     }
 
-    // DELETE /api/v1/trucks/{id} - Delete a truck
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTruck(@PathVariable Integer id,
             @AuthenticationPrincipal UserPrincipal principal) {
         try {
             truckService.deleteTruck(id, principal.getCompanyId());
-            return ResponseEntity.noContent().build(); // Standard response for successful delete
+            return ResponseEntity.noContent().build(); 
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }

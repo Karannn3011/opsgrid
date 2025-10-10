@@ -9,5 +9,5 @@ public record CreateExpenseRequest(
         BigDecimal amount,
         ExpenseCategory category,
         LocalDate expenseDate,
-        Integer truckId // Optional: Only for maintenance expenses
+        Integer truckId 
 ) {}

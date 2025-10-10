@@ -2,8 +2,8 @@ package com.opsgrid.backend.service;
 
 import com.opsgrid.backend.dto.CreateTruckRequest;
 import com.opsgrid.backend.dto.TruckDTO;
-import org.springframework.data.domain.Page; // Import Page
-import org.springframework.data.domain.Pageable; // Import Pageable
+import org.springframework.data.domain.Page; 
+import org.springframework.data.domain.Pageable; 
 
 import java.util.List;
 

@@ -13,8 +13,8 @@ import com.opsgrid.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.Page; // Import Page
-import org.springframework.data.domain.Pageable; // Import Pageable
+import org.springframework.data.domain.Page; 
+import org.springframework.data.domain.Pageable; 
 
 import java.util.List;
 import java.util.UUID;
@@ -34,28 +34,28 @@ public class DriverServiceImpl implements DriverService {
     public DriverDTO createDriverProfile(CreateDriverRequest request, Integer companyId) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company not found with id: " + companyId));
-        // 1. Find the corresponding User...
+        
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + request.userId()));
         if (!"ROLE_DRIVER".equals(user.getRole().getName())) {
             throw new RuntimeException("User is not a driver.");
         }
 
-        // 2. Check if a driver profile already exists...
+        
         if (driverRepository.existsById(request.userId())) {
             throw new RuntimeException("Driver profile already exists for this user.");
         }
 
-        // 3. Create the new Driver entity
+        
         Driver driver = new Driver();
         driver.setUser(user);
         driver.setCompany(company);
-        // REMOVED THE LINE: driver.setId(user.getId());
+        
         driver.setFullName(request.fullName());
         driver.setLicenseNumber(request.licenseNumber());
         driver.setContactNumber(request.contactNumber());
 
-        // 4. Optionally assign a truck...
+        
         if (request.assignedTruckId() != null) {
             Truck truck = truckRepository.findByIdAndCompanyId(request.assignedTruckId(), companyId)
                     .orElseThrow(() -> new RuntimeException("Truck not found with id: " + request.assignedTruckId()));
@@ -89,7 +89,7 @@ public class DriverServiceImpl implements DriverService {
         driver.setLicenseNumber(request.licenseNumber());
         driver.setContactNumber(request.contactNumber());
 
-        // Handle truck assignment update
+        
         if (request.assignedTruckId() != null) {
             Truck truck = truckRepository.findByIdAndCompanyId(request.assignedTruckId(), companyId)
                     .orElseThrow(() -> new RuntimeException("Truck not found with id: " + request.assignedTruckId()));
@@ -102,7 +102,7 @@ public class DriverServiceImpl implements DriverService {
         return convertToDto(updatedDriver);
     }
 
-    // Helper to convert the complex Driver entity to a flat DTO
+    
     private DriverDTO convertToDto(Driver driver) {
         return new DriverDTO(
                 driver.getId(),

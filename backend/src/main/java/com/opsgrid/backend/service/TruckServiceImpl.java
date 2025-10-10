@@ -8,8 +8,8 @@ import com.opsgrid.backend.repository.CompanyRepository;
 import com.opsgrid.backend.repository.TruckRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Page; // Import Page
-import org.springframework.data.domain.Pageable; // Import Pageable
+import org.springframework.data.domain.Page; 
+import org.springframework.data.domain.Pageable; 
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,10 +38,10 @@ public class TruckServiceImpl implements TruckService {
 
     @Override
     public Page<TruckDTO> getAllTrucks(Integer companyId, Pageable pageable) {
-        // Fetch a page of Truck entities from the repository
+        
         Page<Truck> truckPage = truckRepository.findAllByCompanyId(companyId, pageable);
         
-        // Use the .map() function of the Page object to convert each Truck to a TruckDTO
+        
         return truckPage.map(this::convertToDto);
     }
 
@@ -75,7 +75,7 @@ public class TruckServiceImpl implements TruckService {
         truckRepository.delete(truck);
     }
 
-    // Helper method to convert Entity to DTO
+    
     private TruckDTO convertToDto(Truck truck) {
         return new TruckDTO(
                 truck.getId(),

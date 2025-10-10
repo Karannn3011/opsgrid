@@ -45,14 +45,14 @@ public class DataSeeder implements CommandLineRunner {
     private void seedCompanies() {
         Faker faker = new Faker(new Locale("en-US"));
 
-        // Create 2 distinct companies
+        
         Company company1 = createCompany(faker.company().name() + " Transport");
         Company company2 = createCompany(faker.company().name() + " Freight");
 
-        // Seed data for the first company
+        
         seedDataForCompany(faker, company1);
 
-        // Seed data for the second company
+        
         seedDataForCompany(faker, company2);
     }
 
@@ -65,15 +65,15 @@ public class DataSeeder implements CommandLineRunner {
     private void seedDataForCompany(Faker faker, Company company) {
         System.out.println("Seeding data for company: " + company.getName());
 
-        // === Get Roles ===
+        
         Role adminRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow();
         Role managerRole = roleRepository.findByName("ROLE_MANAGER").orElseThrow();
         Role driverRole = roleRepository.findByName("ROLE_DRIVER").orElseThrow();
 
-        // === Create Users (Admin, Manager, Drivers) ===
+        
         String companyDomain = company.getName().toLowerCase().replaceAll("[^a-z0-9]", "") + ".com";
 
-        // Admin
+        
         User admin = new User();
         admin.setUsername("admin_" + company.getId());
         admin.setEmail("admin@" + companyDomain);
@@ -84,7 +84,7 @@ public class DataSeeder implements CommandLineRunner {
         admin.setCompany(company);
         userRepository.save(admin);
 
-        // Manager
+        
         User manager = new User();
         manager.setUsername("manager_" + company.getId());
         manager.setEmail("manager@" + companyDomain);
@@ -95,7 +95,7 @@ public class DataSeeder implements CommandLineRunner {
         manager.setCompany(company);
         userRepository.save(manager);
 
-        // Drivers (30)
+        
         List<User> driverUsers = new ArrayList<>();
         for (int i = 0; i < 30; i++) {
             String firstName = faker.name().firstName();
@@ -110,7 +110,7 @@ public class DataSeeder implements CommandLineRunner {
             driverUsers.add(userRepository.save(driverUser));
         }
 
-        // === Create Trucks (40) ===
+        
         List<Truck> trucks = new ArrayList<>();
         for (int i = 0; i < 40; i++) {
             Truck truck = new Truck();
@@ -119,12 +119,12 @@ public class DataSeeder implements CommandLineRunner {
             truck.setModel(faker.options().option("FH16", "R-series", "TGX", "Actros", "XF", "S-Way"));
             truck.setYear(faker.number().numberBetween(2018, 2024));
             truck.setCapacityKg(faker.number().numberBetween(15000, 25000));
-            truck.setStatus(faker.options().option(TruckStatus.WORKING, TruckStatus.IN_REPAIR, TruckStatus.WORKING, TruckStatus.WORKING)); // Skewed towards working
+            truck.setStatus(faker.options().option(TruckStatus.WORKING, TruckStatus.IN_REPAIR, TruckStatus.WORKING, TruckStatus.WORKING)); 
             truck.setCompany(company);
             trucks.add(truckRepository.save(truck));
         }
 
-        // === Create Driver Profiles ===
+        
         List<Driver> drivers = new ArrayList<>();
         for (int i = 0; i < driverUsers.size(); i++) {
             Driver driverProfile = new Driver();
@@ -132,7 +132,7 @@ public class DataSeeder implements CommandLineRunner {
             driverProfile.setFullName(driverUsers.get(i).getUsername().split("_")[0] + " " + faker.name().lastName());
             driverProfile.setLicenseNumber(faker.regexify("[A-Z]{2}[0-9]{11}"));
             driverProfile.setContactNumber(faker.phoneNumber().cellPhone());
-            // Assign a truck to most, but not all drivers
+            
             if (i < trucks.size() && faker.bool().bool()) {
                 driverProfile.setAssignedTruck(trucks.get(i));
             }
@@ -140,7 +140,7 @@ public class DataSeeder implements CommandLineRunner {
             drivers.add(driverRepository.save(driverProfile));
         }
 
-        // === Create Shipments (50) and link Incomes ===
+        
         for (int i = 0; i < 50; i++) {
             Shipment shipment = new Shipment();
             shipment.setDescription(faker.commerce().productName() + " Transport");
@@ -157,7 +157,7 @@ public class DataSeeder implements CommandLineRunner {
                 shipment.setCompletedAt(faker.date().past(30, TimeUnit.DAYS).toInstant());
                 Shipment savedShipment = shipmentRepository.save(shipment);
 
-                // Create a corresponding income for the delivered shipment
+                
                 Income income = new Income();
                 income.setDescription("Payment for Shipment #" + savedShipment.getId());
                 income.setAmount(BigDecimal.valueOf(faker.number().randomDouble(2, 1500, 8000)));
@@ -170,7 +170,7 @@ public class DataSeeder implements CommandLineRunner {
             }
         }
 
-        // === Create Issues (35) ===
+        
         for (int i = 0; i < 35; i++) {
             Issue issue = new Issue();
             Driver reportingDriver = drivers.get(faker.number().numberBetween(0, drivers.size()));
@@ -189,7 +189,7 @@ public class DataSeeder implements CommandLineRunner {
             issueRepository.save(issue);
         }
 
-        // === Create Expenses (40) ===
+        
         for (int i = 0; i < 40; i++) {
             Expense expense = new Expense();
             ExpenseCategory category = faker.options().option(ExpenseCategory.class);

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ShipmentService {
-    // All methods now require a companyId
+    
     ShipmentDTO createShipment(CreateShipmentRequest request, UUID managerId, Integer companyId);
     Page<ShipmentDTO> getAllShipments(Integer companyId, Pageable pageable);
     Page<ShipmentDTO> getShipmentsForDriver(UUID driverId, Integer companyId, Pageable pageable);

@@ -1,13 +1,13 @@
 package com.opsgrid.backend.controller;
 
 import com.opsgrid.backend.dto.UserDTO;
-import com.opsgrid.backend.dto.UserDetailsDTO; // Import the new DTO
+import com.opsgrid.backend.dto.UserDetailsDTO; 
 import com.opsgrid.backend.entity.User;
 import com.opsgrid.backend.repository.UserRepository;
 import com.opsgrid.backend.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page; // Import Page
-import org.springframework.data.domain.Pageable; // Import Pageable
+import org.springframework.data.domain.Page; 
+import org.springframework.data.domain.Pageable; 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,7 +26,7 @@ public class UserController {
 
     private final UserRepository userRepository;
 
-    // This new endpoint gets all users for the admin's company
+    
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UserDetailsDTO>> getAllUsers(
@@ -39,7 +39,7 @@ public class UserController {
 
     @GetMapping("/unprofiled-drivers")
     public ResponseEntity<List<UserDTO>> getUnprofiledDrivers(@AuthenticationPrincipal UserPrincipal principal) {
-        // ... this method remains unchanged
+        
         List<User> users = userRepository.findUsersWithRoleDriverAndNoDriverProfile(principal.getCompanyId());
         List<UserDTO> userDTOs = users.stream()
                 .map(user -> new UserDTO(user.getId(), user.getUsername(), user.getEmail()))
@@ -47,7 +47,7 @@ public class UserController {
         return ResponseEntity.ok(userDTOs);
     }
 
-    // Helper method to convert User entity to the detailed DTO
+    
     private UserDetailsDTO convertToUserDetailsDTO(User user) {
         return new UserDetailsDTO(
                 user.getId(),

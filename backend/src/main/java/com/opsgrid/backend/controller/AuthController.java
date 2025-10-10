@@ -48,7 +48,7 @@ public class AuthController {
             userService.setPassword(setPasswordRequest);
             return ResponseEntity.ok("Password set successfully. You can now log in.");
         } catch (RuntimeException e) {
-            // Catches errors like "Invalid token" or "Token expired"
+            
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -56,23 +56,23 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        // Authenticate the user
+        
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
 
-        // Set the authentication in the security context
+        
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Generate the JWT
+        
         String jwt = jwtService.generateJwtToken(authentication);
 
-        // Get user details
+        
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        // Return the response
+        
         return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), roles));
     }
 }
