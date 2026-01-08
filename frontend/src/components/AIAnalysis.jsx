@@ -5,7 +5,7 @@ import { GoogleGenAI } from "@google/genai";
 
 // NOTE: In a real production app, you should proxy this through your backend to hide the key.
 // For a personal project/demo, putting VITE_GEMINI_API_KEY in .env is acceptable.
-const ai = new GoogleGenAI({apiKey: import.meta.env.VITE_GEMINI_API_KEY});
+
 
 const AIAnalysis = () => {
   const [question, setQuestion] = useState("");
@@ -45,7 +45,7 @@ const AIAnalysis = () => {
             INCOMES: [${incomeData || "None"}]. 
             EXPENSES: [${expenseData || "None"}].
             Provide a concise, professional insight based strictly on this data.`;
-
+      const ai = new GoogleGenAI({apiKey: import.meta.env.VITE_GEMINI_API_KEY});
       // 4. Call Gemini API
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-lite",

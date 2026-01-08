@@ -1,51 +1,97 @@
 import React from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Wrench, Droplet, FileText, DollarSign } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 const ExpensesTable = ({ expenses, onDelete }) => {
   if (!expenses || expenses.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-800">
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-white">No Expenses Found</h3>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
-          Add a new expense to get started.
+      <div className="p-8 text-center border border-dashed border-border rounded-sm">
+        <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+          Ledger Empty
+        </h3>
+        <p className="mt-1 text-xs font-mono text-muted-foreground">
+          No operational costs recorded.
         </p>
       </div>
     );
   }
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const getCategoryIcon = (category) => {
+    switch(category) {
+      case 'MAINTENANCE': return <Wrench className="w-3 h-3" />;
+      case 'FUEL': return <Droplet className="w-3 h-3" />;
+      default: return <FileText className="w-3 h-3" />;
+    }
+  };
+
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-gray-50 dark:bg-gray-700">
-          <tr>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">Date</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">Description</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">Category</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">Amount</th>
-            <th scope="col" className="relative px-6 py-3">
-              <span className="sr-only">Actions</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-          {expenses.map((expense) => (
-            <tr key={expense.id}>
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300">{expense.expenseDate}</td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{expense.description}</td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300">{expense.category}</td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300">${expense.amount.toFixed(2)}</td>
-              <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                <button
-                  onClick={() => onDelete(expense.id)}
-                  className="ml-4 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
-              </td>
+    <div className="border border-border bg-card overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-secondary/50 text-xs uppercase text-muted-foreground font-mono">
+            <tr>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider">Date</th>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider">Category</th>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider">Details</th>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider text-right">Amount</th>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider text-right">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-border/50">
+            {expenses.map((expense) => (
+              <tr key={expense.id} className="group hover:bg-secondary/20 transition-colors">
+                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                  {formatDate(expense.expenseDate)}
+                </td>
+                <td className="px-4 py-3">
+                   <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm border text-[10px] font-bold uppercase tracking-wide
+                     ${expense.category === 'MAINTENANCE' ? 'bg-destructive/10 text-destructive border-destructive/20' : 
+                       expense.category === 'FUEL' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 
+                       'bg-slate-500/10 text-slate-600 border-slate-500/20'}`}>
+                     {getCategoryIcon(expense.category)}
+                     {expense.category}
+                   </div>
+                </td>
+                <td className="px-4 py-3">
+                  <span className="font-mono text-xs uppercase truncate max-w-[200px] block">
+                    {expense.description}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <span className="font-mono font-bold text-foreground">
+                    {formatCurrency(expense.amount)}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-7 w-7 rounded-sm text-muted-foreground hover:bg-destructive hover:text-white opacity-0 group-hover:opacity-100 transition-opacity" 
+                      onClick={() => onDelete(expense.id)}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
