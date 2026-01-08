@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import api from "../services/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const InviteUserForm = ({ onUserInvited, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -36,80 +38,90 @@ const InviteUserForm = ({ onUserInvited, onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <p className="mb-4 rounded-md bg-red-100 p-3 text-center text-sm text-red-700">
+        <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs font-mono uppercase">
           {error}
-        </p>
+        </div>
       )}
+
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">
             Username
           </label>
-          <input
+          <Input
             name="username"
             type="text"
             required
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="font-mono"
+            placeholder="JSMITH"
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">
             Email
           </label>
-          <input
+          <Input
             name="email"
             type="email"
             required
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="font-mono"
+            placeholder="user@opsgrid.com"
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">
             Employee ID
           </label>
-          <input
+          <Input
             name="employeeId"
             type="text"
             required
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="font-mono uppercase"
+            placeholder="EMP-XXXX"
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Role
+          <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">
+            Role Assignment
           </label>
           <select
             name="roleId"
             value={formData.roleId}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="flex h-9 w-full rounded-sm border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-mono uppercase"
           >
-            {/* These IDs correspond to the data.sql seeding */}
+            {/* Added Admin Option (ID: 1) */}
+            <option value="1">Administrator</option>
             <option value="2">Manager</option>
             <option value="3">Driver</option>
           </select>
         </div>
       </div>
-      <div className="mt-6 flex justify-end space-x-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500"
+
+      <div className="flex justify-end gap-3 pt-4 border-t border-border">
+        <Button 
+            type="button" 
+            variant="ghost" 
+            onClick={onCancel}
+            className="uppercase"
         >
           Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        </Button>
+        <Button 
+            type="submit" 
+            disabled={submitting}
+            className="uppercase"
         >
           {submitting ? "Sending..." : "Send Invitation"}
-        </button>
+        </Button>
       </div>
     </form>
   );

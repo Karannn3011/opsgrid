@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const ReportIssueForm = ({ onIssueReported, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -28,10 +30,10 @@ const ReportIssueForm = ({ onIssueReported, onCancel }) => {
           // Pre-fill the form with the assigned truck's ID
           setFormData(prev => ({ ...prev, relatedTruckId: driverProfile.assignedTruckId }));
         } else {
-          setError('You are not assigned to a truck. Please contact your manager.');
+          setError('CRITICAL: No vehicle assigned. Contact Dispatch immediately.');
         }
       } catch (err) {
-        setError('Could not load your driver profile.');
+        setError('System Error: Could not retrieve driver profile.');
       }
     };
     fetchMyProfile();
@@ -53,39 +55,96 @@ const ReportIssueForm = ({ onIssueReported, onCancel }) => {
       const response = await api.post('/issues', payload);
       onIssueReported(response.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to report issue.');
+      setError(err.response?.data?.message || 'Submission failed.');
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      {error && <p className="mb-4 rounded-md bg-red-100 p-3 text-center text-sm text-red-700">{error}</p>}
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs font-mono uppercase">
+          {error}
+        </div>
+      )}
+
       <div className="space-y-4">
-        <input name="title" placeholder="Issue Title (e.g., Flat Tyre)" required onChange={handleChange} className="w-full rounded-md dark:bg-gray-700" />
-        <textarea name="description" placeholder="Describe the issue in detail..." rows="3" onChange={handleChange} className="w-full rounded-md dark:bg-gray-700"></textarea>
-        <div className="grid grid-cols-2 gap-4">
-          <select name="priority" value={formData.priority} onChange={handleChange} className="w-full rounded-md dark:bg-gray-700">
-            <option value="HIGH">High Priority</option>
-            <option value="MEDIUM">Medium Priority</option>
-            <option value="LOW">Low Priority</option>
-          </select>
-          
-          {/* This is now a disabled input showing the assigned truck */}
-          <input 
-            type="text" 
-            disabled 
-            value={assignedTruck ? `Truck: ${assignedTruck.licensePlate}` : 'No truck assigned'}
-            className="w-full rounded-md bg-gray-100 dark:bg-gray-800 dark:text-gray-400"
-          />
+        <div>
+           <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">
+             Incident Title
+           </label>
+           <Input 
+             name="title" 
+             required 
+             value={formData.title} 
+             onChange={handleChange} 
+             placeholder="e.g. BRAKE FAILURE, ENGINE LIGHT"
+             className="font-mono uppercase"
+           />
+        </div>
+
+        <div>
+           <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">
+             Affected Asset (Auto-Detected)
+           </label>
+           <Input 
+              disabled 
+              value={assignedTruck ? `UNIT #${assignedTruck.licensePlate} (ID: ${assignedTruck.id})` : 'NO ASSET DETECTED'}
+              className="bg-secondary/50 text-muted-foreground font-mono"
+           />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          <div>
+            <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">
+              Priority Level
+            </label>
+            <select 
+                name="priority" 
+                value={formData.priority} 
+                onChange={handleChange} 
+                className="flex h-9 w-full rounded-sm border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-mono uppercase"
+            >
+                <option value="HIGH">High (Immediate Action)</option>
+                <option value="MEDIUM">Medium (Schedule Repair)</option>
+                <option value="LOW">Low (Log for Later)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+           <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">
+             Detailed Description
+           </label>
+           <textarea 
+             name="description" 
+             required
+             rows="4" 
+             placeholder="Describe symptoms, noise, warning lights..." 
+             onChange={handleChange} 
+             className="flex min-h-[80px] w-full rounded-sm border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 font-mono"
+           ></textarea>
         </div>
       </div>
-      <div className="mt-6 flex justify-end space-x-3">
-        <button type="button" onClick={onCancel} className="rounded-md bg-gray-200 px-4 py-2">Cancel</button>
-        <button type="submit" disabled={submitting || !assignedTruck} className="rounded-md bg-blue-600 px-4 py-2 text-white disabled:opacity-50">
-          {submitting ? 'Submitting...' : 'Report Issue'}
-        </button>
+
+      <div className="flex justify-end gap-3 pt-4 border-t border-border">
+        <Button 
+            type="button" 
+            variant="ghost" 
+            onClick={onCancel}
+            className="uppercase"
+        >
+          Cancel
+        </Button>
+        <Button 
+            type="submit" 
+            disabled={submitting || !assignedTruck}
+            variant="destructive"
+            className="uppercase"
+        >
+          {submitting ? 'Transmitting...' : 'Submit Report'}
+        </Button>
       </div>
     </form>
   );

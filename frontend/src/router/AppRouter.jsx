@@ -19,7 +19,7 @@ import UsersPage from "../pages/dashboard/UsersPage";
 import DriversPage from "../pages/dashboard/DriversPage";
 import ShipmentsPage from "../pages/dashboard/ShipmentsPage";
 import IssuesPage from "../pages/dashboard/IssuesPage";
-import FinancePage from "../pages/dashboard/FinancePage"; // Import FinancePage
+import FinancePage from "../pages/dashboard/ExpensesPage"; // Import FinancePage
 import MaintenancePage from "../pages/dashboard/MaintenancePage";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
