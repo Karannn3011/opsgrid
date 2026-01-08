@@ -5,11 +5,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.opsgrid.backend.security.UserPrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication; 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -19,15 +20,14 @@ import com.opsgrid.backend.repository.UserRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException; 
-import io.jsonwebtoken.io.Decoders; 
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 @Service
-public class JwtService implements InitializingBean { 
+public class JwtService implements InitializingBean {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
-
     private final UserRepository userRepository;
 
     public JwtService(UserRepository userRepository) {
@@ -38,10 +38,8 @@ public class JwtService implements InitializingBean {
     private String jwtSecret;
 
     private final int jwtExpirationMs = 86400000;
-
     private Key key;
 
-    
     @Override
     public void afterPropertiesSet() throws Exception {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
@@ -49,21 +47,17 @@ public class JwtService implements InitializingBean {
     }
 
     public String generateJwtToken(Authentication authentication) {
-        UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
+        // Cast to your custom UserPrincipal
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-        
-        
         List<String> roles = userPrincipal.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
-        
 
-        return Jwts.builder()
-                .setSubject((userPrincipal.getUsername()))
-                
-                
+        return Jwts.builder().setSubject((userPrincipal.getUsername()))
                 .claim("roles", roles)
-                
+                .claim("companyName", userPrincipal.getCompanyName()) // <--- Add claim here
+                .claim("companyId", userPrincipal.getCompanyId()) // Good practice to have ID too
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key)

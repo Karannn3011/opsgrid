@@ -9,8 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarFooter,
-  useSidebar, // 1. Import the useSidebar hook
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,71 +22,83 @@ import {
   LayoutDashboard,
   DollarSign,
   Wrench,
-  LogOut,
 } from 'lucide-react';
 
 export default function NewSidebar() {
   const { isMobile } = useIsMobile();
-  const { toggleSidebar } = useSidebar(); // 2. Get the toggleSidebar function from the hook
-  const { user, logout } = useAuth();
+  const { toggleSidebar } = useSidebar();
+  const { user } = useAuth();
   const isAdmin = user?.roles?.includes('ROLE_ADMIN');
   const isManager = user?.roles?.includes('ROLE_MANAGER');
 
-  // 3. Create the onClick handler function
   const handleLinkClick = () => {
-    
+    if (isMobile) {
       toggleSidebar();
-  
+    }
   };
 
   return (
-    <Sidebar collapsible={isMobile ? 'offcanvas' : 'icon'}>
+    <Sidebar collapsible="icon" variant="sidebar">
       <SidebarContent>
+        {/* Logo Area - Updated */}
+        <div className="p-4 border-b border-sidebar-border group-data-[collapsible=icon]:p-2 transition-[padding]">
+          <div className="flex items-center gap-2 font-bold text-xl tracking-tighter group-data-[collapsible=icon]:justify-center">
+            {/* Logo: Always visible, prevents shrinking */}
+            <img 
+              src="/favicon.svg" 
+              alt="OpsGrid Logo" 
+              className="h-6 w-6 shrink-0" 
+            />
+            {/* Text: Hidden when sidebar is collapsed (icon mode) */}
+            <span className="group-data-[collapsible=icon]:hidden transition-opacity duration-200 whitespace-nowrap">
+              OPSGRID
+            </span>
+          </div>
+        </div>
+
         <SidebarGroup>
-          <SidebarGroupLabel className={"text-xl mb-4 mx-auto"}>OpsGrid</SidebarGroupLabel>
+          <SidebarGroupLabel className="uppercase tracking-widest text-[10px] font-bold text-sidebar-foreground/60 mt-2 group-data-[collapsible=icon]:hidden">
+            Operations
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Dashboard Link */}
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  {/* 4. Add the onClick handler to the NavLink */}
+                <SidebarMenuButton asChild tooltip="Dashboard">
                   <NavLink to="/dashboard" end onClick={handleLinkClick}>
-                    <LayoutDashboard />
-                    <span>Dashboard</span>
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span>Overview</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-
-              {/* Apply the same onClick handler to all other NavLink items */}
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild tooltip="Trucks">
                   <NavLink to="/dashboard/trucks" onClick={handleLinkClick}>
-                    <Truck />
-                    <span>Trucks</span>
+                    <Truck className="h-4 w-4" />
+                    <span>Fleet</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild tooltip="Drivers">
                   <NavLink to="/dashboard/drivers" onClick={handleLinkClick}>
-                    <Users />
-                    <span>Drivers</span>
+                    <Users className="h-4 w-4" />
+                    <span>Personnel</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild tooltip="Shipments">
                   <NavLink to="/dashboard/shipments" onClick={handleLinkClick}>
-                    <Package />
-                    <span>Shipments</span>
+                    <Package className="h-4 w-4" />
+                    <span>Logistics</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild tooltip="Issues">
                   <NavLink to="/dashboard/issues" onClick={handleLinkClick}>
-                    <AlertTriangle />
-                    <span>Issues</span>
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>Incidents</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -97,22 +108,24 @@ export default function NewSidebar() {
 
         {(isAdmin || isManager) && (
           <SidebarGroup>
-            <SidebarGroupLabel>Management</SidebarGroupLabel>
+            <SidebarGroupLabel className="uppercase tracking-widest text-[10px] font-bold text-sidebar-foreground/60 mt-4 group-data-[collapsible=icon]:hidden">
+              Management
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip="Maintenance">
                     <NavLink to="/dashboard/maintenance" onClick={handleLinkClick}>
-                      <Wrench />
+                      <Wrench className="h-4 w-4" />
                       <span>Maintenance</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip="Finance">
                     <NavLink to="/dashboard/finance" onClick={handleLinkClick}>
-                      <DollarSign />
-                      <span>Finance</span>
+                      <DollarSign className="h-4 w-4" />
+                      <span>Ledger</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -123,14 +136,16 @@ export default function NewSidebar() {
 
         {isAdmin && (
           <SidebarGroup>
-            <SidebarGroupLabel>Administration</SidebarGroupLabel>
+            <SidebarGroupLabel className="uppercase tracking-widest text-[10px] font-bold text-sidebar-foreground/60 mt-4 group-data-[collapsible=icon]:hidden">
+              System
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip="User Management">
                     <NavLink to="/dashboard/users" onClick={handleLinkClick}>
-                      <UserCog />
-                      <span>User Management</span>
+                      <UserCog className="h-4 w-4" />
+                      <span>Access Control</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -139,7 +154,6 @@ export default function NewSidebar() {
           </SidebarGroup>
         )}
       </SidebarContent>
-      
     </Sidebar>
   );
 }

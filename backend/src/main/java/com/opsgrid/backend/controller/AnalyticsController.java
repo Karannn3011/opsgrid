@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import com.opsgrid.backend.dto.DashboardStatsDTO;
 
 @RestController
 @RequestMapping("/api/v1/analytics")
@@ -22,16 +23,21 @@ public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
 
-
+    @GetMapping("/stats") // New Endpoint
+    public ResponseEntity<DashboardStatsDTO> getDashboardStats(@AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(analyticsService.getDashboardStats(principal.getCompanyId()));
+    }
 
     @GetMapping("/shipment-summary")
-    public ResponseEntity<List<ShipmentStatusSummaryDTO>> getShipmentSummary(@AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<List<ShipmentStatusSummaryDTO>> getShipmentSummary(
+            @AuthenticationPrincipal UserPrincipal principal) {
         List<ShipmentStatusSummaryDTO> summary = analyticsService.getShipmentStatusSummary(principal.getCompanyId());
         return ResponseEntity.ok(summary);
     }
 
     @GetMapping("/truck-summary")
-    public ResponseEntity<List<TruckStatusSummaryDTO>> getTruckSummary(@AuthenticationPrincipal UserPrincipal principal) {
+    public ResponseEntity<List<TruckStatusSummaryDTO>> getTruckSummary(
+            @AuthenticationPrincipal UserPrincipal principal) {
         List<TruckStatusSummaryDTO> summary = analyticsService.getTruckStatusSummary(principal.getCompanyId());
         return ResponseEntity.ok(summary);
     }

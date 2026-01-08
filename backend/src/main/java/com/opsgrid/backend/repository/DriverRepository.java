@@ -11,9 +11,10 @@ import java.util.UUID;
 
 public interface DriverRepository extends JpaRepository<Driver, UUID> {
 
-    
     Page<Driver> findAllByCompanyId(Integer companyId, Pageable pagable);
-
     
     Optional<Driver> findByIdAndCompanyId(UUID driverId, Integer companyId);
+
+    // Added: For Dashboard Stats
+    long countByCompanyId(Integer companyId);
 }
