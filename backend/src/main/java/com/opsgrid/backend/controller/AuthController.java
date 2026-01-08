@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import com.opsgrid.backend.security.UserPrincipal;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -36,7 +37,8 @@ public class AuthController {
     public ResponseEntity<?> registerCompany(@RequestBody CompanyRegistrationRequest registrationRequest) {
         try {
             userService.registerCompany(registrationRequest);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Company registered successfully. The admin can now log in.");
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body("Company registered successfully. The admin can now log in.");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -48,31 +50,31 @@ public class AuthController {
             userService.setPassword(setPasswordRequest);
             return ResponseEntity.ok("Password set successfully. You can now log in.");
         } catch (RuntimeException e) {
-            
+
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
-
-        
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        
         String jwt = jwtService.generateJwtToken(authentication);
 
-        
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        // Cast to UserPrincipal to get the custom fields
+        UserPrincipal userDetails = (UserPrincipal) authentication.getPrincipal();
+
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        
-        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), roles));
+        return ResponseEntity.ok(new JwtResponse(
+                jwt,
+                userDetails.getUsername(),
+                roles,
+                userDetails.getCompanyName() // <--- Pass the name here
+        ));
     }
 }

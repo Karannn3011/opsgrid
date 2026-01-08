@@ -34,6 +34,9 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
+        // --- FIX: Initialize Roles First ---
+        initRoles(); 
+
         if (companyRepository.count() == 0) {
             System.out.println("No companies found. Seeding initial data...");
             seedCompanies();
@@ -42,17 +45,28 @@ public class DataSeeder implements CommandLineRunner {
         }
     }
 
+    // --- FIX: Helper method to create roles if missing ---
+    private void initRoles() {
+        createRoleIfNotFound("ROLE_ADMIN");
+        createRoleIfNotFound("ROLE_MANAGER");
+        createRoleIfNotFound("ROLE_DRIVER");
+    }
+
+    private void createRoleIfNotFound(String name) {
+        if (roleRepository.findByName(name).isEmpty()) {
+            Role role = new Role();
+            role.setName(name);
+            roleRepository.save(role);
+        }
+    }
+
     private void seedCompanies() {
         Faker faker = new Faker(new Locale("en-US"));
 
-        
         Company company1 = createCompany(faker.company().name() + " Transport");
         Company company2 = createCompany(faker.company().name() + " Freight");
 
-        
         seedDataForCompany(faker, company1);
-
-        
         seedDataForCompany(faker, company2);
     }
 
@@ -65,15 +79,13 @@ public class DataSeeder implements CommandLineRunner {
     private void seedDataForCompany(Faker faker, Company company) {
         System.out.println("Seeding data for company: " + company.getName());
 
-        
+        // These lines will now work because initRoles() ran first
         Role adminRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow();
         Role managerRole = roleRepository.findByName("ROLE_MANAGER").orElseThrow();
         Role driverRole = roleRepository.findByName("ROLE_DRIVER").orElseThrow();
 
-        
         String companyDomain = company.getName().toLowerCase().replaceAll("[^a-z0-9]", "") + ".com";
 
-        
         User admin = new User();
         admin.setUsername("admin_" + company.getId());
         admin.setEmail("admin@" + companyDomain);
@@ -84,7 +96,6 @@ public class DataSeeder implements CommandLineRunner {
         admin.setCompany(company);
         userRepository.save(admin);
 
-        
         User manager = new User();
         manager.setUsername("manager_" + company.getId());
         manager.setEmail("manager@" + companyDomain);
@@ -95,7 +106,6 @@ public class DataSeeder implements CommandLineRunner {
         manager.setCompany(company);
         userRepository.save(manager);
 
-        
         List<User> driverUsers = new ArrayList<>();
         for (int i = 0; i < 30; i++) {
             String firstName = faker.name().firstName();
@@ -110,7 +120,6 @@ public class DataSeeder implements CommandLineRunner {
             driverUsers.add(userRepository.save(driverUser));
         }
 
-        
         List<Truck> trucks = new ArrayList<>();
         for (int i = 0; i < 40; i++) {
             Truck truck = new Truck();
@@ -124,7 +133,6 @@ public class DataSeeder implements CommandLineRunner {
             trucks.add(truckRepository.save(truck));
         }
 
-        
         List<Driver> drivers = new ArrayList<>();
         for (int i = 0; i < driverUsers.size(); i++) {
             Driver driverProfile = new Driver();
@@ -140,7 +148,6 @@ public class DataSeeder implements CommandLineRunner {
             drivers.add(driverRepository.save(driverProfile));
         }
 
-        
         for (int i = 0; i < 50; i++) {
             Shipment shipment = new Shipment();
             shipment.setDescription(faker.commerce().productName() + " Transport");
@@ -157,7 +164,6 @@ public class DataSeeder implements CommandLineRunner {
                 shipment.setCompletedAt(faker.date().past(30, TimeUnit.DAYS).toInstant());
                 Shipment savedShipment = shipmentRepository.save(shipment);
 
-                
                 Income income = new Income();
                 income.setDescription("Payment for Shipment #" + savedShipment.getId());
                 income.setAmount(BigDecimal.valueOf(faker.number().randomDouble(2, 1500, 8000)));
@@ -170,7 +176,6 @@ public class DataSeeder implements CommandLineRunner {
             }
         }
 
-        
         for (int i = 0; i < 35; i++) {
             Issue issue = new Issue();
             Driver reportingDriver = drivers.get(faker.number().numberBetween(0, drivers.size()));
@@ -189,7 +194,6 @@ public class DataSeeder implements CommandLineRunner {
             issueRepository.save(issue);
         }
 
-        
         for (int i = 0; i < 40; i++) {
             Expense expense = new Expense();
             ExpenseCategory category = faker.options().option(ExpenseCategory.class);

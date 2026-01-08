@@ -94,7 +94,6 @@ public class UserServiceImpl implements UserService {
         
         
         emailService.sendInvitationEmail(user.getEmail(), token);
-        System.out.println("Invitation Link: http:
 
         return user;
     }
