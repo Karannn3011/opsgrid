@@ -70,14 +70,15 @@ export default function NewSidebar() {
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
+              {(isAdmin || isManager) && <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Trucks">
                   <NavLink to="/dashboard/trucks" onClick={handleLinkClick}>
                     <Truck className="h-4 w-4" />
                     <span>Fleet</span>
                   </NavLink>
                 </SidebarMenuButton>
-              </SidebarMenuItem>
+              </SidebarMenuItem>}
+              
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Drivers">
                   <NavLink to="/dashboard/drivers" onClick={handleLinkClick}>

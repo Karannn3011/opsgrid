@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const DriverForm = ({ onSave, onCancel, initialData = null }) => {
   const [formData, setFormData] = useState({
@@ -10,39 +12,30 @@ const DriverForm = ({ onSave, onCancel, initialData = null }) => {
     assignedTruckId: "",
   });
 
-  // State for dropdown options
   const [availableUsers, setAvailableUsers] = useState([]);
   const [availableTrucks, setAvailableTrucks] = useState([]);
-
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const isEditMode = initialData !== null;
 
-  // Fetch data for dropdowns (users for create, trucks for both)
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // ++ START: LOGIC FIX ++
-        // The /trucks endpoint is now paginated. We need to get the 'content' array.
-        // We'll request a large size to get all trucks for the dropdown.
-        const trucksRes = await api.get("/trucks?size=200"); // Request up to 200 trucks
-        setAvailableTrucks(trucksRes.data.content); // Use the .content property
-        // ++ END: LOGIC FIX ++
+        const trucksRes = await api.get("/trucks?size=200");
+        setAvailableTrucks(trucksRes.data.content);
 
-        // Only fetch unprofiled users if we are in "create" mode
         if (!isEditMode) {
           const usersRes = await api.get("/users/unprofiled-drivers");
           setAvailableUsers(usersRes.data);
         }
       } catch (err) {
-        setError("Failed to load necessary data for the form.");
+        setError("System Error: Failed to retrieve auxiliary data.");
       }
     };
     fetchData();
   }, [isEditMode]);
 
-  // Populate form if in edit mode
   useEffect(() => {
     if (isEditMode) {
       setFormData({
@@ -71,7 +64,7 @@ const DriverForm = ({ onSave, onCancel, initialData = null }) => {
           ? parseInt(formData.assignedTruckId, 10)
           : null,
       };
-      await onSave(payload); // Parent component handles the API call
+      await onSave(payload);
     } catch (err) {
       setError(err.response?.data?.message || "Operation failed.");
     } finally {
@@ -80,23 +73,23 @@ const DriverForm = ({ onSave, onCancel, initialData = null }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <p className="mb-4 rounded-md bg-red-100 p-3 text-center text-sm text-red-700">
+        <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs font-mono uppercase">
           {error}
-        </p>
+        </div>
       )}
+      
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            User
+          <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">
+            Associated User Account
           </label>
           {isEditMode ? (
-            <input
-              type="text"
+            <Input
               disabled
               value={initialData.username}
-              className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
+              className="bg-secondary/50 text-muted-foreground font-mono"
             />
           ) : (
             <>
@@ -105,9 +98,9 @@ const DriverForm = ({ onSave, onCancel, initialData = null }) => {
                 value={formData.userId}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                className="flex h-9 w-full rounded-sm border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-mono"
               >
-                <option value="">Select a User</option>
+                <option value="">SELECT USER ACCOUNT</option>
                 {availableUsers?.map((user) => (
                   <option key={user.id} value={user.id}>
                     {user.username} ({user.email})
@@ -115,98 +108,92 @@ const DriverForm = ({ onSave, onCancel, initialData = null }) => {
                 ))}
               </select>
               {availableUsers.length === 0 && (
-                <p className="mt-1 text-xs text-gray-500">
-                  No available driver users. Please invite a new user with the
-                  'Driver' role first.
+                <p className="mt-1 text-[10px] text-destructive uppercase">
+                  Alert: No unassigned driver accounts available. Invite new user first.
                 </p>
               )}
             </>
           )}
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Full Name
+          <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">
+            Full Legal Name
           </label>
-          <input
+          <Input
             name="fullName"
-            type="text"
             required
             value={formData.fullName}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            placeholder="ENTER FULL NAME"
+            className="font-mono uppercase"
           />
         </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              License Number
+            <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">
+              License ID
             </label>
-            <input
+            <Input
               name="licenseNumber"
-              type="text"
               required
               value={formData.licenseNumber}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              placeholder="LIC-XXXX-XXXX"
+              className="font-mono uppercase"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Contact Number
+            <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">
+              Contact #
             </label>
-            <input
+            <Input
               name="contactNumber"
-              type="text"
               value={formData.contactNumber}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              placeholder="+XX XXX XXX XXXX"
+              className="font-mono"
             />
           </div>
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Assign Truck (Optional)
+          <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">
+            Assign Vehicle Asset
           </label>
           <select
             name="assignedTruckId"
             value={formData.assignedTruckId}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            className="flex h-9 w-full rounded-sm border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-mono"
           >
-            <option value="">No Truck Assigned</option>
-            {availableTrucks.length != 0 ? (
-              availableTrucks.map((truck) => (
-                <option key={truck.id} value={truck.id}>
-                  {truck.licensePlate} ({truck.make} {truck.model})
-                </option>
-              ))
-            ) : (
-              <></>
-            )}
+            <option value="">NO ASSET ASSIGNED</option>
+            {availableTrucks.map((truck) => (
+              <option key={truck.id} value={truck.id}>
+                {truck.licensePlate} ({truck.make} {truck.model})
+              </option>
+            ))}
           </select>
         </div>
       </div>
-      <div className="mt-6 flex justify-end space-x-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500"
+
+      <div className="flex justify-end gap-3 pt-4 border-t border-border">
+        <Button 
+            type="button" 
+            variant="ghost" 
+            onClick={onCancel}
+            className="uppercase"
         >
           Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={submitting || (!isEditMode && availableUsers.length === 0)}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        </Button>
+        <Button 
+            type="submit" 
+            disabled={submitting || (!isEditMode && availableUsers.length === 0)}
+            className="uppercase"
         >
-          {isEditMode
-            ? submitting
-              ? "Saving..."
-              : "Save Changes"
-            : submitting
-              ? "Creating..."
-              : "Create Profile"}
-        </button>
+          {isEditMode ? (submitting ? "Saving..." : "Save Profile") : (submitting ? "Creating..." : "Create Profile")}
+        </Button>
       </div>
     </form>
   );

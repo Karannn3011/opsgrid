@@ -1,25 +1,147 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 import api from "../../services/api";
 import DriversTable from "../../components/DriversTable";
 import Modal from "../../components/common/Modal";
 import DriverForm from "../../components/DriverForm";
 import PaginationControls from "../../components/common/PaginationControls";
-import {Loader} from "lucide-react"
+import { Loader, UserPlus, RefreshCw, User, Truck, Phone, Hash } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-function DriversPage() {
+// --- SUB-COMPONENT: Driver Service Record (View for Drivers) ---
+const DriverServiceRecord = () => {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-      document.title = "OpsGrid | Drivers"
-    }, [])
+    const fetchProfile = async () => {
+      try {
+        // This calls the /me endpoint instead of the forbidden /drivers endpoint
+        const { data } = await api.get('/drivers/me');
+        setProfile(data);
+      } catch (err) {
+        console.error("Failed to fetch profile", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  if (loading) return <div className="p-8 text-center font-mono text-xs uppercase animate-pulse">Loading Service Record...</div>;
+  if (!profile) return <div className="p-8 text-center font-mono text-xs uppercase text-destructive">Profile Not Found</div>;
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-500">
+      <div className="border-b border-border pb-4">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground uppercase">
+          Service Record
+        </h1>
+        <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+          Personnel Identification & Status
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+         {/* ID Card Column */}
+         <div className="md:col-span-1 border border-border bg-card p-4 flex flex-col items-center text-center space-y-4">
+            <div className="w-32 h-32 bg-secondary rounded-sm flex items-center justify-center border border-dashed border-border">
+               <User className="w-12 h-12 text-muted-foreground/50" />
+            </div>
+            <div>
+              <div className="text-lg font-bold uppercase tracking-tight">{profile.fullName}</div>
+              <div className="text-xs font-mono text-primary uppercase">Active Operator</div>
+            </div>
+            <div className="w-full border-t border-border pt-4 text-left space-y-2">
+               <div>
+                 <span className="text-[10px] uppercase text-muted-foreground block">Employee ID</span>
+                 <span className="text-xs font-mono">{profile.username}</span>
+               </div>
+               <div>
+                 <span className="text-[10px] uppercase text-muted-foreground block">Company</span>
+                 <span className="text-xs font-mono">{profile.companyName}</span>
+               </div>
+            </div>
+         </div>
+
+         {/* Details Column */}
+         <div className="md:col-span-2 space-y-4">
+            {/* License & Contact */}
+            <div className="border border-border bg-card p-6 relative overflow-hidden">
+               <div className="absolute top-0 right-0 p-2 opacity-5">
+                 <Hash className="w-24 h-24" />
+               </div>
+               <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Credentials</h3>
+               <div className="grid grid-cols-2 gap-6">
+                 <div>
+                    <div className="flex items-center gap-2 mb-1">
+                       <Hash className="w-3 h-3 text-primary" />
+                       <span className="text-[10px] uppercase text-muted-foreground">License Number</span>
+                    </div>
+                    <div className="text-lg font-mono">{profile.licenseNumber}</div>
+                 </div>
+                 <div>
+                    <div className="flex items-center gap-2 mb-1">
+                       <Phone className="w-3 h-3 text-primary" />
+                       <span className="text-[10px] uppercase text-muted-foreground">Contact</span>
+                    </div>
+                    <div className="text-lg font-mono">{profile.contactNumber}</div>
+                 </div>
+               </div>
+            </div>
+
+            {/* Assigned Asset */}
+            <div className="border border-border bg-card p-6 relative overflow-hidden">
+               <div className="absolute top-0 right-0 p-2 opacity-5">
+                 <Truck className="w-24 h-24" />
+               </div>
+               <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Assigned Asset</h3>
+               {profile.assignedTruckId ? (
+                 <div className="space-y-2">
+                    <div className="text-2xl font-mono font-bold tracking-tighter text-primary">
+                       {profile.assignedTruckLicensePlate}
+                    </div>
+                    <div className="text-xs font-mono text-muted-foreground uppercase">
+                       ID: #{profile.assignedTruckId} • Status: <span className="text-emerald-500">Operational</span>
+                    </div>
+                 </div>
+               ) : (
+                 <div className="text-sm font-mono text-muted-foreground uppercase py-2">
+                   No vehicle currently assigned
+                 </div>
+               )}
+            </div>
+         </div>
+      </div>
+    </div>
+  );
+};
+
+
+// --- MAIN COMPONENT: Drivers Page (Manager View) ---
+function DriversPage() {
+  const { user } = useAuth();
+
+  // 1. ROLE CHECK: If driver, show Service Record
+  if (user?.roles?.includes('ROLE_DRIVER')) {
+    return <DriverServiceRecord />;
+  }
+
+  // --- ADMIN/MANAGER LOGIC BELOW ---
+  useEffect(() => {
+      document.title = "OpsGrid | Personnel"
+  }, [])
+
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Pagination State
+  // Pagination
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const PAGE_SIZE = 10;
 
-  // Modal State
+  // Modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingDriver, setEditingDriver] = useState(null);
@@ -36,19 +158,17 @@ function DriversPage() {
       setCurrentPage(pageData.number);
       setError(null);
     } catch (err) {
-      setError("Failed to fetch drivers.");
-      setTotalPages(0); // Reset pages on error
+      setError("Failed to fetch personnel manifest.");
+      setTotalPages(0); 
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // useEffect now correctly handles fetching data when the page changes
   useEffect(() => {
     fetchDrivers(currentPage);
   }, [fetchDrivers, currentPage]);
 
-  // handlePageChange now only updates the state, triggering the useEffect
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
       setCurrentPage(newPage);
@@ -56,7 +176,6 @@ function DriversPage() {
   };
 
   const refreshAndCloseModals = () => {
-    // After a change, go back to the first page if not already there
     if (currentPage === 0) {
         fetchDrivers(0);
     } else {
@@ -83,55 +202,61 @@ function DriversPage() {
   };
 
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800 dark:text-white">
-            Driver Management
+          <h1 className="text-2xl font-bold tracking-tight text-foreground uppercase">
+            Personnel Manifest
           </h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">
-            Create and manage your company's driver profiles.
+          <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+            Operator Profiles & Assignments
           </p>
         </div>
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-blue-700"
-        >
-          Create Driver Profile
-        </button>
+        <div className="flex gap-2">
+            <Button variant="tactical" size="sm" onClick={() => fetchDrivers(currentPage)}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                SYNC
+            </Button>
+            <Button variant="default" size="sm" onClick={() => setIsCreateModalOpen(true)}>
+                <UserPlus className="w-4 h-4 mr-2" />
+                NEW PROFILE
+            </Button>
+        </div>
       </div>
 
-      {(loading || error) && (
-    <div className="absolute flex top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 justify-center items-center p-8">
-        {loading ? (
-            <div className="flex flex-col items-center gap-2">
-                <Loader className="h-8 w-8 mx-auto animate-spin text-blue-600 scale-130" />
-            </div>
-        ) : error ? (
-            <p className="rounded-md bg-red-100 p-4 text-center text-red-700">
-                {error}
-            </p>
-        ) : null}
-    </div>
-)}
-
-      {!loading && !error && (
+      {/* Content */}
+      {(loading || error) ? (
+        <div className="flex flex-col items-center justify-center p-12 border border-dashed border-border rounded-sm">
+            {loading ? (
+                <>
+                  <Loader className="h-8 w-8 animate-spin text-primary mb-4" />
+                  <span className="text-xs font-mono uppercase text-muted-foreground">Accessing Personnel Database...</span>
+                </>
+            ) : (
+                <div className="text-destructive font-mono uppercase text-xs">Error: {error}</div>
+            )}
+        </div>
+      ) : (
         <>
           <DriversTable drivers={drivers} onEdit={handleEditClick} />
           {totalPages > 1 && (
-              <PaginationControls
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
+              <div className="mt-4">
+                <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                />
+              </div>
           )}
         </>
       )}
 
+      {/* Modals */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="Create New Driver Profile"
+        title="CREATE PERSONNEL PROFILE"
       >
         <DriverForm
           onSave={handleCreateProfile}
@@ -146,7 +271,7 @@ function DriversPage() {
             setIsEditModalOpen(false);
             setEditingDriver(null);
           }}
-          title={`Edit Profile: ${editingDriver.fullName}`}
+          title={`EDIT PROFILE: ${editingDriver.fullName}`}
         >
           <DriverForm
             onSave={handleUpdateProfile}

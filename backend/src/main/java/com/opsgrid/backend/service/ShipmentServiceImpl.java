@@ -25,12 +25,12 @@ public class ShipmentServiceImpl implements ShipmentService {
     private final TruckRepository truckRepository;
     private final CompanyRepository companyRepository;
 
+    // ... createShipment, getAllShipments, getShipmentsForDriver (keep as is) ...
     @Override
     @Transactional
     public ShipmentDTO createShipment(CreateShipmentRequest request, UUID managerId, Integer companyId) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company not found with id: " + companyId));
-
         
         User manager = userRepository.findByIdAndCompanyId(managerId, companyId)
                 .orElseThrow(() -> new RuntimeException("Manager not found in this company"));
@@ -38,7 +38,6 @@ public class ShipmentServiceImpl implements ShipmentService {
                 .orElseThrow(() -> new RuntimeException("Driver not found in this company"));
         Truck truck = truckRepository.findByIdAndCompanyId(request.assignedTruckId(), companyId)
                 .orElseThrow(() -> new RuntimeException("Truck not found in this company"));
-
         
         Shipment shipment = new Shipment();
         shipment.setDescription(request.description());
@@ -66,6 +65,50 @@ public class ShipmentServiceImpl implements ShipmentService {
         return shipmentPage.map(this::convertToDto);
     }
 
+    // --- IMPLEMENTATION: Get Active Shipments ---
+    @Override
+    public List<ShipmentDTO> getActiveShipmentsForDriver(UUID driverId, Integer companyId) {
+        // Fetch everything that is NOT 'DELIVERED' (i.e., PENDING, IN_TRANSIT)
+        List<Shipment> shipments = shipmentRepository.findByAssignedDriverIdAndCompanyIdAndStatusNot(
+                driverId, companyId, ShipmentStatus.DELIVERED
+        );
+        return shipments.stream().map(this::convertToDto).collect(Collectors.toList());
+    }
+
+    // ... getShipmentById, updateShipment, updateShipmentStatus, deleteShipment (keep as is) ...
+    @Override
+    public ShipmentDTO getShipmentById(Integer id, Integer companyId) {
+        Shipment shipment = shipmentRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(() -> new RuntimeException("Shipment not found with id: " + id));
+        return convertToDto(shipment);
+    }
+
+    @Override
+    @Transactional
+    public ShipmentDTO updateShipment(Integer id, CreateShipmentRequest request, Integer companyId) {
+        Shipment shipment = shipmentRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(() -> new RuntimeException("Shipment not found with id: " + id));
+
+        shipment.setDescription(request.description());
+        shipment.setOrigin(request.origin());
+        shipment.setDestination(request.destination());
+
+        if (request.assignedDriverId() != null) {
+             Driver driver = driverRepository.findByIdAndCompanyId(request.assignedDriverId(), companyId)
+                .orElseThrow(() -> new RuntimeException("Driver not found in this company"));
+             shipment.setAssignedDriver(driver);
+        }
+
+        if (request.assignedTruckId() != null) {
+             Truck truck = truckRepository.findByIdAndCompanyId(request.assignedTruckId(), companyId)
+                .orElseThrow(() -> new RuntimeException("Truck not found in this company"));
+             shipment.setAssignedTruck(truck);
+        }
+
+        Shipment updatedShipment = shipmentRepository.save(shipment);
+        return convertToDto(updatedShipment);
+    }
+
     @Override
     @Transactional
     public ShipmentDTO updateShipmentStatus(Integer shipmentId, ShipmentStatus status, Integer companyId) {
@@ -81,8 +124,14 @@ public class ShipmentServiceImpl implements ShipmentService {
         return convertToDto(updatedShipment);
     }
 
+    @Override
+    @Transactional
+    public void deleteShipment(Integer id, Integer companyId) {
+        Shipment shipment = shipmentRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(() -> new RuntimeException("Shipment not found with id: " + id));
+        shipmentRepository.delete(shipment);
+    }
 
-    
     private ShipmentDTO convertToDto(Shipment shipment) {
         return new ShipmentDTO(
                 shipment.getId(),

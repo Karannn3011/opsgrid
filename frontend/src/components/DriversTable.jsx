@@ -1,51 +1,85 @@
 import React from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, User, Phone, Hash, Truck } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
-const DriversTable = ({ drivers, onEdit, onDelete }) => {
+const DriversTable = ({ drivers, onEdit }) => {
   if (!drivers || drivers.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-800">
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-white">No Driver Profiles Found</h3>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
-          Create a driver profile to assign them to shipments.
+      <div className="p-8 text-center border border-dashed border-border rounded-sm">
+        <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+          No Personnel Records
+        </h3>
+        <p className="mt-1 text-xs font-mono text-muted-foreground">
+          Create a profile to begin assignment.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-gray-50 dark:bg-gray-700">
-          <tr>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">Full Name</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">Username</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">License Number</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">Contact</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">Assigned Truck</th>
-            <th scope="col" className="relative px-6 py-3">
-              <span className="sr-only">Actions</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-          {drivers.map((driver) => (
-            <tr key={driver.userId}>
-              <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{driver.fullName}</td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300">{driver.username}</td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300">{driver.licenseNumber}</td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300">{driver.contactNumber}</td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300">{driver.assignedTruckLicensePlate || 'N/A'}</td>
-              <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                <button onClick={() => onEdit(driver)} className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
-                  <Edit className="h-5 w-5" />
-                </button>
-                {/* Optional: Add delete functionality if needed */}
-              </td>
+    <div className="border border-border bg-card overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-secondary/50 text-xs uppercase text-muted-foreground font-mono">
+            <tr>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider">Operator Identity</th>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider">License ID</th>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider">Contact</th>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider">Assigned Asset</th>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider text-right">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-border/50">
+            {drivers.map((driver) => (
+              <tr key={driver.userId} className="group hover:bg-secondary/20 transition-colors">
+                <td className="px-4 py-3">
+                   <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-sm bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                         <User className="w-4 h-4" />
+                      </div>
+                      <div>
+                         <div className="font-mono font-medium text-foreground">{driver.fullName}</div>
+                         <div className="text-[10px] text-muted-foreground font-mono uppercase">{driver.username}</div>
+                      </div>
+                   </div>
+                </td>
+                <td className="px-4 py-3 font-mono text-xs">
+                   <div className="flex items-center gap-2">
+                      <Hash className="w-3 h-3 text-muted-foreground" />
+                      {driver.licenseNumber}
+                   </div>
+                </td>
+                <td className="px-4 py-3 font-mono text-xs">
+                   <div className="flex items-center gap-2">
+                      <Phone className="w-3 h-3 text-muted-foreground" />
+                      {driver.contactNumber}
+                   </div>
+                </td>
+                <td className="px-4 py-3 font-mono text-xs">
+                   {driver.assignedTruckLicensePlate ? (
+                      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-secondary border border-border">
+                         <Truck className="w-3 h-3" />
+                         {driver.assignedTruckLicensePlate}
+                      </div>
+                   ) : (
+                      <span className="text-muted-foreground/50 uppercase italic text-[10px]">Unassigned</span>
+                   )}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-7 w-7 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity" 
+                      onClick={() => onEdit(driver)}
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
