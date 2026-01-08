@@ -1,104 +1,90 @@
 import React from "react";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const TrucksTable = ({ trucks, onEdit, onDelete }) => {
   if (!trucks || trucks.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-800">
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
-          No Trucks Found
+      <div className="p-8 text-center border border-dashed border-border rounded-sm">
+        <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+          Fleet Registry Empty
         </h3>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
-          Get started by adding your first truck to the fleet.
+        <p className="mt-1 text-xs font-mono text-muted-foreground">
+          Initialize fleet by adding your first unit.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md dark:border-gray-700 dark:bg-gray-800">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-gray-50 dark:bg-gray-700">
-          <tr>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300"
-            >
-              License Plate
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300"
-            >
-              Make & Model
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300"
-            >
-              Year
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300"
-            >
-              Status
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300"
-            >
-              Capacity (kg)
-            </th>
-            <th scope="col" className="relative px-6 py-3">
-              <span className="sr-only">Actions</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-          {trucks.map((truck) => (
-            <tr key={truck.id}>
-              <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                {truck.licensePlate}
-              </td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
-                {truck.make} {truck.model}
-              </td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
-                {truck.year}
-              </td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm">
-                <span
-                  className={`rounded-full px-2 py-1 text-xs font-semibold leading-5 ${
-                    truck.status === "WORKING"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-yellow-100 text-yellow-800"
-                  }`}
-                >
-                  {truck.status}
-                </span>
-              </td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
-                {truck.capacityKg}
-              </td>
-              <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                <button
-                  onClick={() => onEdit(truck)}
-                  className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                >
-                  <Edit className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => onDelete(truck.id)}
-                  className="ml-4 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
-              </td>
+    <div className="border border-border bg-card overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-secondary/50 text-xs uppercase text-muted-foreground font-mono">
+            <tr>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider">Unit ID / Plate</th>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider">Configuration</th>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider">Model Year</th>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider">Capacity</th>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider">Status</th>
+              <th className="px-4 py-3 font-medium border-b border-border tracking-wider text-right">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-border/50">
+            {trucks.map((truck) => (
+              <tr key={truck.id} className="group hover:bg-secondary/20 transition-colors">
+                <td className="px-4 py-3 font-mono font-medium text-foreground">
+                  {truck.licensePlate}
+                  <div className="text-[10px] text-muted-foreground">ID: #{truck.id}</div>
+                </td>
+                <td className="px-4 py-3 font-mono uppercase text-xs">
+                  {truck.make} <span className="text-muted-foreground">/</span> {truck.model}
+                </td>
+                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                  {truck.year}
+                </td>
+                <td className="px-4 py-3 font-mono text-xs">
+                  {truck.capacityKg?.toLocaleString()} <span className="text-[10px] text-muted-foreground">KG</span>
+                </td>
+                <td className="px-4 py-3">
+                   <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm border text-[10px] font-bold uppercase tracking-wide
+                     ${truck.status === 'WORKING' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : 
+                       truck.status === 'IN_REPAIR' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 
+                       'bg-slate-500/10 text-slate-600 border-slate-500/20'}`}>
+                     
+                     {truck.status === 'WORKING' && <CheckCircle className="w-3 h-3" />}
+                     {truck.status === 'IN_REPAIR' && <AlertTriangle className="w-3 h-3" />}
+                     {truck.status === 'OUT_OF_SERVICE' && <Clock className="w-3 h-3" />}
+                     
+                     {truck.status === 'WORKING' ? 'OPERATIONAL' : 
+                      truck.status === 'IN_REPAIR' ? 'MAINTENANCE' : 'IDLE'}
+                   </div>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="h-7 w-7 rounded-sm" 
+                        onClick={() => onEdit(truck)}
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="h-7 w-7 rounded-sm text-destructive hover:bg-destructive hover:text-white"
+                        onClick={() => onDelete(truck.id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

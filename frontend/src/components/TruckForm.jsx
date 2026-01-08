@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button"; // Use your UI button
+import { Input } from "@/components/ui/input";   // Use your UI input
 
 const TruckForm = ({ onSubmit, onCancel, initialData = null, submitting }) => {
   const [formData, setFormData] = useState({
@@ -10,8 +12,6 @@ const TruckForm = ({ onSubmit, onCancel, initialData = null, submitting }) => {
     status: 'WORKING',
   });
 
-  // If initialData is provided, it means we are in "edit" mode.
-  // This effect will run once to populate the form with the truck's current data.
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -32,56 +32,81 @@ const TruckForm = ({ onSubmit, onCancel, initialData = null, submitting }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // The parent component's onSubmit function will handle the API call
     onSubmit(formData); 
   };
 
-  const formTitle = initialData ? 'Edit Truck' : 'Add New Truck';
-  const submitButtonText = initialData ? (submitting ? 'Updating...' : 'Update Truck') : (submitting ? 'Adding...' : 'Add Truck');
+  const submitButtonText = initialData ? (submitting ? 'Updating...' : 'Update Unit') : (submitting ? 'Registering...' : 'Register Unit');
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">License Plate</label>
-          <input name="licensePlate" type="text" required value={formData.licensePlate} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+          <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">
+             License Plate ID
+          </label>
+          <Input 
+             name="licensePlate" 
+             required 
+             value={formData.licensePlate} 
+             onChange={handleChange} 
+             placeholder="e.g. KA-01-AB-1234"
+             className="font-mono uppercase"
+          />
         </div>
+        
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Make</label>
-            <input name="make" type="text" required value={formData.make} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+            <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">Make</label>
+            <Input name="make" required value={formData.make} onChange={handleChange} placeholder="e.g. Volvo" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Model</label>
-            <input name="model" type="text" required value={formData.model} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+            <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">Model</label>
+            <Input name="model" required value={formData.model} onChange={handleChange} placeholder="e.g. FH16" />
           </div>
         </div>
+
          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Year</label>
-              <input name="year" type="number" required value={formData.year} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">Year</label>
+              <Input name="year" type="number" required value={formData.year} onChange={handleChange} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Capacity (kg)</label>
-              <input name="capacityKg" type="number" required value={formData.capacityKg} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">Capacity (KG)</label>
+              <Input name="capacityKg" type="number" required value={formData.capacityKg} onChange={handleChange} />
             </div>
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
-          <select name="status" value={formData.status} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-            <option value="WORKING">Working</option>
-            <option value="IN_REPAIR">In Repair</option>
-            <option value="OUT_OF_SERVICE">Out of Service</option>
+          <label className="block text-xs font-mono font-medium uppercase text-muted-foreground mb-1">Current Status</label>
+          <select 
+            name="status" 
+            value={formData.status} 
+            onChange={handleChange} 
+            className="flex h-9 w-full rounded-sm border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-mono"
+          >
+            <option value="WORKING">Operational (Working)</option>
+            <option value="IN_REPAIR">Maintenance (In Repair)</option>
+            <option value="OUT_OF_SERVICE">Decommissioned (Idle)</option>
           </select>
         </div>
       </div>
-      <div className="mt-6 flex justify-end space-x-3">
-        <button type="button" onClick={onCancel} className="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500">
+
+      <div className="flex justify-end gap-3 pt-4 border-t border-border">
+        <Button 
+            type="button" 
+            variant="ghost" 
+            onClick={onCancel}
+            className="uppercase"
+        >
           Cancel
-        </button>
-        <button type="submit" disabled={submitting} className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+        </Button>
+        <Button 
+            type="submit" 
+            disabled={submitting}
+            className="uppercase"
+        >
           {submitButtonText}
-        </button>
+        </Button>
       </div>
     </form>
   );
